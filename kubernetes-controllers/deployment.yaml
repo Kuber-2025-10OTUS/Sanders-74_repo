@@ -2,10 +2,19 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nginx-deployment
+  namespace: homework
   labels:
-    app: nginx
+    user: Schneider.Alex
+    task: Homework.2
+    course: Kubernetes-platform
+    university: Otus
+    executionDate: 19.11.2025
+
 spec:
   replicas: 3
+  selector:
+    matchLabels:
+      app: 'nginx'
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -14,19 +23,12 @@ spec:
     metadata:
       name: nginx
       namespace: homework
-      labels: 
-        user: Schneider.Alex
-        task: Homework.2
-        course: Kubernetes-platform
-        university: Otus
-        executionDate: 19.11.2025
+      labels:
+        app: 'nginx'
     spec:
       containers:
       - name: nginx
         image: nginx:latest
-        selector:
-          matchLabels:
-            homework: true
         ports:
         - containerPort: 8000
         volumeMounts:
@@ -40,7 +42,6 @@ spec:
         readinessProbe:
           exec:
             command: ["[ -f /homework/index.html ]"]
-
       initContainers:
       - name: nginx-init
         image: busybox:latest
@@ -52,6 +53,9 @@ spec:
         volumeMounts:
         - name: sharedcatalog
           mountPath: /init
+      nodeSelector:
+        homework: 'true'
+
       volumes:
       - name: sharedcatalog
         emptyDir: {}
