@@ -1,0 +1,54 @@
+проверяем работу нашего сервиса clusterIP
+k get po -A -w       #  копируем имя любого пода из нашего деплоймента
+
+k get svc nginx-service -n homework    # копируем ip адрес сервиса 
+
+заходим на наш под
+k exec -it nginx-deployment-779476998-qt5fg -n homework -- /bin/bash
+
+curl -v http://10.99.216.77/
+
+получаем ответ от нашего сервиса в виде html страницы
+
+проверяем работу нашего ingress
+
+helm install 
+
+k get po -A -w  #  копируем имя пода нашего ingress контроллера my-release-nginx-ingress-controller-799d44f4c-kftdb
+
+k describe po my-release-nginx-ingress-controller-799d44f4c-kftdb   # копируем ip адрес контроллера 10.244.0.56
+
+k get ingress -n homework -w
+
+$ k describe ingress virtual-host-ingress-nginx -n homework
+Name:             virtual-host-ingress-nginx
+Labels:           <none>
+Namespace:        homework
+Address:          
+Ingress Class:    <none>
+Default backend:  <default>
+Rules:
+  Host           Path  Backends
+  ----           ----  --------
+  homework.otus  
+                 /   nginx-service:80 (10.244.0.55:80,10.244.0.54:80,10.244.0.53:80)
+Annotations:     <none>
+Events:          <none>
+
+k get ingress -A
+NAMESPACE   NAME                         CLASS    HOSTS           ADDRESS   PORTS   AGE
+homework    virtual-host-ingress-nginx   <none>   homework.otus             80      118m
+
+ingress контроллер не получает внешний IP. статус Pending
+для того чтобы получить внешний адрес в minikube необходимо ввести команду minkube tunnel
+после этого ingress-controller получит адрес
+k get svc -n default
+
+sudo nano /etc/hosts
+добавляем в hosts строчку 
+10.110.34.165 homework.otus
+ 
+NAME                                  TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)                      AGE
+kubernetes                            ClusterIP      10.96.0.1       <none>          443/TCP                      333d
+my-release-nginx-ingress-controller   LoadBalancer   10.110.34.165   10.110.34.165   80:30444/TCP,443:32153/TCP   25h
+

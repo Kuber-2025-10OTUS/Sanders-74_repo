@@ -2,10 +2,11 @@ apiVersion: v1
 kind: Service
 metadata:
   name: nginx-service
+  namespace: homework
 spec:
   type: ClusterIP
   selector:
-    app: 'nginx-deployment'
+    app: nginx
 #    app: nginx # This matches the labels from the Deployment
   ports:
   - protocol: TCP

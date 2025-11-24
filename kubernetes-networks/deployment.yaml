@@ -12,7 +12,7 @@ metadata:
     app: nginx-deployment
 
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: 'nginx'
@@ -26,26 +26,29 @@ spec:
       namespace: homework
       labels:
         app: 'nginx'
+      annotations:
+        kubectl.kubernetes.io/default-container: "nginx" 
     spec:
       containers:
+
       - name: nginx
         image: nginx:latest
         ports:
         - name: nginxport
-          containerPort: 8000
+          containerPort: 80
         volumeMounts:
         - name: sharedcatalog
-          mountPath: /homework
+          mountPath: /usr/share/nginx/html
         lifecycle:
           preStop:
             exec:
               command:
-              - rm /homework/index.html
+              - rm /usr/share/nginx/html/index.html
         readinessProbe:
-          periodSeconds: 1
+          periodSeconds: 5
           httpGet:
-            path: /index.html
-            port: 8000
+            path: /
+            port: nginxport
 
       initContainers:
       - name: nginx-init
@@ -59,7 +62,8 @@ spec:
         - name: sharedcatalog
           mountPath: /init
       nodeSelector:
-        homework: 'true'
+        app: 'nginx'
+#        homework: 'true'
 
       volumes:
       - name: sharedcatalog
