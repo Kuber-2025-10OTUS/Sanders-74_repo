@@ -3,15 +3,22 @@ kind: Ingress
 metadata:
   name: virtual-host-ingress-nginx
   namespace: homework
-#  annotations:
-#    nginx.ingress.kubernetes.io/rewrite-target: /
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /index.html
 spec:
   rules:
-  - host: homework.otus
+  - host: 'homework.otus'
     http:
       paths:
-      - pathType: Prefix
-        path: "/"
+      - path: /homepage
+        pathType: Exact
+        backend:
+          service:
+            name: nginx-service
+            port:
+              number: 80
+      - path: /
+        pathType: Prefix
         backend:
           service:
             name: nginx-service

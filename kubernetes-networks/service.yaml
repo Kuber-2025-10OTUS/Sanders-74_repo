@@ -7,7 +7,7 @@ spec:
   type: ClusterIP
   selector:
     app: nginx
-#    app: nginx # This matches the labels from the Deployment
+
   ports:
   - protocol: TCP
     port: 80 # Port the service exposes
