@@ -1,0 +1,125 @@
+проверяем работу нашего сервиса clusterIP
+k get po -A -w       #  копируем имя любого пода из нашего деплоймента
+
+k get svc nginx-service -n homework    # копируем ip адрес сервиса 
+
+заходим на наш под
+k exec -it nginx-deployment-67696cc8-gnsdz  -n homework -- /bin/bash
+
+curl -v http://10.99.216.77/
+
+получаем ответ от нашего сервиса в виде html страницы
+
+проверяем работу нашего ingress
+
+helm install 
+
+
+$ k get po -A -w
+NAMESPACE     NAME                                                  READY   STATUS    RESTARTS         AGE
+default       my-release-nginx-ingress-controller-799d44f4c-cnfmn   1/1     Running   4 (26h ago)      46h
+homework      nginx-deployment-67696cc8-gnsdz                       1/1     Running   0                98m
+homework      nginx-deployment-67696cc8-jfl9f                       1/1     Running   0                98m
+homework      nginx-deployment-67696cc8-rbtxp                       1/1     Running   4 (26h ago)      42h
+kube-system   coredns-6f6b679f8f-pfssl                              1/1     Running   8 (26h ago)      335d
+kube-system   etcd-minikube                                         1/1     Running   1 (26h ago)      26h
+kube-system   kube-apiserver-minikube                               1/1     Running   9 (26h ago)      335d
+kube-system   kube-controller-manager-minikube                      1/1     Running   10 (26h ago)     335d
+kube-system   kube-proxy-r497z                                      1/1     Running   8 (26h ago)      335d
+kube-system   kube-scheduler-minikube                               1/1     Running   8 (26h ago)      335d
+kube-system   storage-provisioner                                   1/1     Running   16 (3h39m ago)   335d
+
+
+свойства ingress
+k get ingress -n homework -w
+
+$ k describe ingress virtual-host-ingress-nginx -n homework
+Name:             virtual-host-ingress-nginx
+Labels:           <none>
+Namespace:        homework
+Address:          
+Ingress Class:    <none>
+Default backend:  <default>
+Rules:
+  Host           Path  Backends
+  ----           ----  --------
+  homework.otus  
+                 /homepage   nginx-service:80 (10.244.0.73:80,10.244.0.75:80,10.244.0.76:80)
+                 /           nginx-service:80 (10.244.0.73:80,10.244.0.75:80,10.244.0.76:80)
+Annotations:     nginx.ingress.kubernetes.io/rewrite-target: /index.html
+Events:          <none>
+
+
+
+запускаем minkiube tunnel
+
+~ [] $ minikube tunnel
+Status:	
+	machine: minikube
+	pid: 13127
+	route: 10.96.0.0/12 -> 192.168.39.23
+	minikube: Running
+	services: [my-release-nginx-ingress-controller]
+    errors: 
+		minikube: no errors
+		router: no errors
+		loadbalancer emulator: no errors
+
+
+k get svc -n default
+
+ 
+$ k get svc -A -w
+NAMESPACE     NAME                                  TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)                      AGE
+default       kubernetes                            ClusterIP      10.96.0.1       <none>          443/TCP                      335d
+default       my-release-nginx-ingress-controller   LoadBalancer   10.110.34.165   10.110.34.165   80:30444/TCP,443:32153/TCP   2d20h
+homework      nginx-service                         ClusterIP      10.98.49.32     <none>          80/TCP                       2d
+kube-system   kube-dns                              ClusterIP      10.96.0.10      <none>          53/UDP,53/TCP,9153/TCP       335d
+
+sudo nano /etc/hosts
+добавляем в hosts строчку 
+10.110.34.165 homework.otus
+
+
+к сожалению обращение к  curl http://homework.otus/   и к curl http://10.110.34.16/  приводят к 404 ошибке.
+в логах сервиса обращений не видно.  
+в логах ингресс контролер обращения видны  
+k logs -f my-release-nginx-ingress-controller-799d44f4c-cnfmn
+
+10.244.0.1 - - [25/Nov/2025:08:28:03 +0000] "GET / HTTP/1.1" 404 153 "-" "curl/8.5.0" "-"
+10.244.0.1 - - [25/Nov/2025:08:29:01 +0000] "GET / HTTP/1.1" 404 555 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" "-"
+10.244.0.1 - - [25/Nov/2025:08:29:28 +0000] "GET / HTTP/1.1" 404 555 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" "-"
+10.244.0.1 - - [25/Nov/2025:08:29:31 +0000] "GET / HTTP/1.1" 404 555 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" "-"
+10.244.0.1 - - [25/Nov/2025:08:29:32 +0000] "GET / HTTP/1.1" 404 555 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" "-"
+10.244.0.1 - - [25/Nov/2025:08:29:32 +0000] "GET / HTTP/1.1" 404 555 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" "-"
+
+$ curl -v http://homework.otus/
+* Host homework.otus:80 was resolved.
+* IPv6: (none)
+* IPv4: 10.110.34.165
+*   Trying 10.110.34.165:80...
+* Connected to homework.otus (10.110.34.165) port 80
+> GET / HTTP/1.1
+> Host: homework.otus
+> User-Agent: curl/8.5.0
+> Accept: */*
+> 
+< HTTP/1.1 404 Not Found
+< Server: nginx/1.29.1
+< Date: Tue, 25 Nov 2025 08:44:30 GMT
+< Content-Type: text/html
+< Content-Length: 153
+< Connection: keep-alive
+< 
+<html>
+<head><title>404 Not Found</title></head>
+<body>
+<center><h1>404 Not Found</h1></center>
+<hr><center>nginx/1.29.1</center>
+</body>
+</html>
+* Connection #0 to host homework.otus left intact
+
+k get ingress -A-A
+NAMESPACE   NAME                         CLASS    HOSTS           ADDRESS   PORTS   AGE
+homework    virtual-host-ingress-nginx   <none>   homework.otus             80      8m7s

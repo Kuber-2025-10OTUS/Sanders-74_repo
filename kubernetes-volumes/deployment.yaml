@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  namespace: homework
+  labels:
+    user: Schneider.Alex
+    task: Homework.3
+    course: Kubernetes-platform
+    university: Otus
+    executionDate: 22.11.2025
+    app: nginx-deployment
+
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: 'nginx'
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  template:
+    metadata:
+      name: nginx
+      namespace: homework
+      labels:
+        app: 'nginx'
+      annotations:
+        kubectl.kubernetes.io/default-container: "nginx" 
+    spec:
+      containers:
+
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - name: nginxport
+          containerPort: 80
+        volumeMounts:
+        - name: sharedcatalog
+          mountPath: /usr/share/nginx/html
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - rm /usr/share/nginx/html/index.html
+        readinessProbe:
+          periodSeconds: 5
+          httpGet:
+            path: /
+            port: nginxport
+
+      initContainers:
+      - name: nginx-init
+        image: busybox:latest
+        command:
+        - wget
+        - "-O"
+        - "/init/index.html"
+        - https://line-mode.cern.ch/www/hypertext/WWW/TheProject.html
+        volumeMounts:
+        - name: sharedcatalog
+          mountPath: /init
+      nodeSelector:
+        app: 'nginx'
+#        homework: 'true'
+
+      volumes:
+      - name: sharedcatalog
+        emptyDir: {}
