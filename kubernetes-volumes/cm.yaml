@@ -10,6 +10,6 @@ data:
 
   application.properties: |
     server.port=8080
-    spring.application.name=my-spring-app
+    spring.application.name=my-app
     spring.datasource.username=appuser
     spring.datasource.password=apppassword
