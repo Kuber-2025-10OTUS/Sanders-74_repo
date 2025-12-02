@@ -1,0 +1,35 @@
+запускаем наши манифесты
+cd ./kubernetes-volumes/
+
+k apply -f pvc.yaml 
+
+k apply -f cm.yaml
+
+k apply -f deployment.yaml
+
+проверяем запустились поды
+$ k get po -n homework
+NAME                                 READY   STATUS    RESTARTS   AGE
+volume-deployment-7bd896696c-6bqjm   1/1     Running   0          4h47m
+volume-deployment-7bd896696c-b777s   1/1     Running   0          4h47m
+volume-deployment-7bd896696c-kxkxc   1/1     Running   0          4h47m
+
+обращаемся к поду
+$ k exec -it volume-deployment-7bd896696c-b777s -n homework -- /bin/bash
+
+# curl http://nginx-service 
+выдает скачанный index.html
+
+обращаемся к configMap
+# curl http://nginx-service/conf/database_url
+jdbc:postgresql://database-service:5432/myappdb
+
+# curl http://nginx-service/conf/application.properties
+server.port=8080
+spring.application.name=my-app
+spring.datasource.username=appuser
+spring.datasource.password=apppassword
+
+
+создан storageClass.yaml
+модифицирован pvc.yaml так, чтобы он задействовал этот класс.  Деплоймент перезапущен. Поднялся.
