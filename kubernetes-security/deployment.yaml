@@ -20,7 +20,7 @@ spec:
     type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 1
-    spec.serviceAccountName: monitoring
+    
   template:
     metadata:
       name: nginx
@@ -30,8 +30,8 @@ spec:
       annotations:
         kubectl.kubernetes.io/default-container: "nginx" 
     spec:
+      serviceAccountName: monitoring
       containers:
-
       - name: nginx
         image: nginx:latest
         command: ["/bin/sh", "-c"]
@@ -61,11 +61,11 @@ spec:
       initContainers:
       - name: nginx-init
         image: busybox:latest
-        command:
-        - wget
-        - "-O"
-        - "/init/index.html"
-        - https://line-mode.cern.ch/www/hypertext/WWW/TheProject.html
+        command: ["/bin/sh", "-c"]
+        args:
+        - "wget -O /init/index.html https://line-mode.cern.ch/www/hypertext/WWW/TheProject.html" 
+        - "&&" 
+        - "wget -O /init/metrics.html https://kubernetes.default.svc/metrics"
         volumeMounts:
         - name: sharedcatalog
           mountPath: /init

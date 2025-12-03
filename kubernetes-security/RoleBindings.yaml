@@ -11,3 +11,18 @@ roleRef:
   kind: Role
   name: metrics-reader
   apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: admin-role-binding-to-cd
+  namespace: homework
+subjects:
+- kind: ServiceAccount
+  name: cd
+  namespace: homework
+roleRef:
+  kind: ClusterRole
+  name: admin
+  apiGroup: rbac.authorization.k8s.io
