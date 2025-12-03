@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: volume-deployment
+  namespace: homework
+  labels:
+    user: Schneider.Alex
+    task: Homework.4
+    course: Kubernetes-platform
+    university: Otus
+    executionDate: 26.11.2025
+    app: volume
+
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: 'nginx'
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+    
+  template:
+    metadata:
+      name: nginx
+      namespace: homework
+      labels:
+        app: 'nginx'
+      annotations:
+        kubectl.kubernetes.io/default-container: "nginx" 
+    spec:
+      serviceAccountName: monitoring
+      containers:
+      - name: nginx
+        image: nginx:latest
+        command: ["/bin/sh", "-c"]
+        args:
+        - sed -i 's|root   /usr/share/nginx/html|root   /homework|g' /etc/nginx/conf.d/default.conf
+          && nginx -g 'daemon off;'
+
+        ports:
+        - name: nginxport
+          containerPort: 80
+        volumeMounts:
+        - name: sharedcatalog
+          mountPath: /homework
+        - name: config-volume
+          mountPath: /homework/conf
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - rm /homework/index.html
+        readinessProbe:
+          periodSeconds: 5
+          httpGet:
+            path: /
+            port: nginxport
+
+      initContainers:
+      - name: nginx-init
+        image: busybox:latest
+        command: ["/bin/sh", "-c"]
+        args:
+        - "wget -O /init/index.html https://line-mode.cern.ch/www/hypertext/WWW/TheProject.html" 
+        - "&&" 
+        - "wget -O /init/metrics.html https://kubernetes.default.svc/metrics"
+        volumeMounts:
+        - name: sharedcatalog
+          mountPath: /init
+      nodeSelector:
+        app: 'nginx'
+
+      volumes:
+      - name: sharedcatalog
+        persistentVolumeClaim:
+          claimName: my-pvc
+      - name: config-volume
+        configMap:
+          name: my-configmap

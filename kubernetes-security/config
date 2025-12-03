@@ -1,0 +1,43 @@
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority: /home/alex/.minikube/ca.crt
+    extensions:
+    - extension:
+        last-update: Mon, 01 Dec 2025 20:00:11 MSK
+        provider: minikube.sigs.k8s.io
+        version: v1.37.0
+      name: cluster_info
+    server: https://192.168.39.23:8443
+  name: minikube
+contexts:
+- context:
+    cluster: minikube
+    extensions:
+    - extension:
+        last-update: Mon, 01 Dec 2025 20:00:11 MSK
+        provider: minikube.sigs.k8s.io
+        version: v1.37.0
+      name: context_info
+    namespace: homework
+    user: cd
+  name: cd
+- context:
+    cluster: minikube
+    extensions:
+    - extension:
+        last-update: Mon, 01 Dec 2025 20:00:11 MSK
+        provider: minikube.sigs.k8s.io
+        version: v1.37.0
+      name: context_info
+    namespace: homework
+    user: minikube
+  name: minikube
+current-context: cd
+kind: Config
+preferences: {}
+users:
+- name: minikube
+  user:
+    client-certificate: /home/alex/.minikube/profiles/minikube/client.crt
+    client-key: /home/alex/.minikube/profiles/minikube/client.key
