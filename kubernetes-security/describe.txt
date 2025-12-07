@@ -1,0 +1,52 @@
+minikube start
+
+запускаем наши манифесты
+cd ./kubernetes-security/
+
+k apply -f SAmonitoring.yaml 
+k apply -f SAcd.yaml
+k apply -f role.yaml
+k apply -f RoleBindings.yaml
+k apply -f deployment.yaml
+
+смотрим результат 
+k get po -n homework
+
+внес изменения в kubeconfig  (~/.kube/config)
+добавил еще один контекст,  назвал его cd,  указал что он использует 
+service account cd,  в пространстве имен homework
+
+k config use cd   # переключился на новый контекст
+
+Но чтобы создать токен нужно переключиться обратно на пользователя minikube иначе насинает спрашивать имя пользователя и пароль
+
+k config use minikube
+
+создаю токен для эккаунта cd
+
+k create token cd --namespace homework --duration=24h > token
+
+содержимое файла token-cd копирую и вставляю в декодер JWT токенов
+
+получаю json 
+{
+  "aud": [
+    "https://kubernetes.default.svc.cluster.local"
+  ],
+  "exp": 1764872223,
+  "iat": 1764785823,
+  "iss": "https://kubernetes.default.svc.cluster.local",
+  "jti": "7b788655-7855-4e31-b506-0e02251e916c",
+  "kubernetes.io": {
+    "namespace": "homework",
+    "serviceaccount": {
+      "name": "cd",
+      "uid": "d925be97-7733-40d3-9374-b2890fa6821f"
+    }
+  },
+  "nbf": 1764785823,
+  "sub": "system:serviceaccount:homework:cd"
+}
+
+deployment исправил.  Добавил скачивание в initcontainer с помощью wget endpoint https://kubernetes.default.svc/metrics"
+файл скачивается, сохраняется.  Но при обращении к нему, я почему то вижу содержимое того же файла index.html, что скачивал рядом.  
