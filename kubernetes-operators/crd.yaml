@@ -18,11 +18,11 @@ spec:
               properties:
                 image: 
                   type: string
-                Database: 
+                database: 
                   type: string
-                Password: 
+                password: 
                   type: string
-                Storage_size:
+                storage_size:
                   type: string
   scope: "Namespaced"
   names:

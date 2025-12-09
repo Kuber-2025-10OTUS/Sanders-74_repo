@@ -6,7 +6,20 @@ cd ./kubernetes-operators/
 k apply -f SAmysqloprtr.yaml
 k apply -f ClusterRole.yaml
 k apply -f RoleBindings.yaml
+k apply -f crd.yaml
 k apply -f deployment.yaml
+k apply -f cr.yaml
+
+
+в ходе отладки я понял, что не удаляется cr.  даже если дать команду... Просто висит и все.  
+
+Нашел решение:  
+k scale -f ./deployment.yaml --replicas=0 -n homework
+kubectl patch mysql mysql-otus-cr-example -n homework --type=json -p='[{"op": "remove", "path": "/metadata/finalizers"}]'
+kubectl delete mysql mysql-otus-cr-example -n homework
+
+после этого удалился cr
+#k patch -f ./crd.yaml -p '{"metadata":{"finalizers":[]}}' --type=merge
 
 
 смотрим результат 
@@ -15,4 +28,8 @@ k get po -n homework
 NAME                                         READY   STATUS    RESTARTS   AGE
 mysql-operator-deployment-5847cc789b-rvhr7   1/1     Running   0          30s
 
+проверяем выделение PV
+k get pv | grep mysql-otus-cr-example
 
+# Проверьте PersistentVolumeClaims
+k get pvc -n homework | grep mysql-otus-cr-example

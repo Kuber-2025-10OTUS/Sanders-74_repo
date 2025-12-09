@@ -22,7 +22,7 @@ spec:
       labels:
         app: 'mysql-operator'
       annotations:
-        kubectl.kubernetes.io/default-container: "mysql-operator" 
+        kubectl.kubernetes.io/default-container: "mysqloprtr" 
     spec:
       serviceAccountName: mysqloprtr
       containers:

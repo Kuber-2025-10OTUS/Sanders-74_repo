@@ -4,6 +4,15 @@ metadata:
   name: mysqloprtr-role
 
 rules:
-- apiGroups: ["*"]
+- apiGroups: ["otus.homework"]
   resources: ["*"]
+  verbs: ["*"]
+- apiGroups: [""]
+  resources: ["*"]
+  verbs: ["*"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "deployments/status", "deployments/scale", "statefulsets", "statefulsets/status"]
+  verbs: ["*"]
+- apiGroups: ["batch"]
+  resources: ["jobs", "cronjobs"]
   verbs: ["*"]
