@@ -31,5 +31,9 @@ mysql-operator-deployment-5847cc789b-rvhr7   1/1     Running   0          30s
 проверяем выделение PV
 k get pv | grep mysql-otus-cr-example
 
+k delete pv mysql-otus-cr-example-pv  
+
 # Проверьте PersistentVolumeClaims
 k get pvc -n homework | grep mysql-otus-cr-example
+
+k describe mysqls mysql-otus-cr-example 

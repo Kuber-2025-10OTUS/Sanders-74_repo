@@ -1,0 +1,204 @@
+Name:         mysql-otus-cr-example
+Namespace:    default
+Labels:       <none>
+Annotations:  kopf.zalando.org/mysql_on_create:
+                {"started":"2025-12-09T09:45:09.843614","delayed":"2025-12-09T17:48:53.846472","purpose":"create","retries":17,"success":false,"failure":f...
+API Version:  otus.homework/v1
+Kind:         MySQL
+Metadata:
+  Creation Timestamp:             2025-12-09T09:45:09Z
+  Deletion Grace Period Seconds:  0
+  Deletion Timestamp:             2025-12-09T17:52:13Z
+  Finalizers:
+    kopf.zalando.org/KopfFinalizerMarker
+  Generation:        2
+  Resource Version:  174427
+  UID:               6c6ae2de-dc14-4f07-b538-e3f4992ea307
+Spec:
+  Database:      mysql_otusdatabase
+  Image:         mysql:8.0
+  Password:      mysql_secure_password
+  storage_size:  10Gi
+Events:
+  Type   Reason   Age   From  Message
+  ----   ------   ----  ----  -------
+  Error  Logging  8h    kopf  Handler 'mysql_on_create' failed with an exception. Will retry.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 276, in execute_handler_once
+    result = await invoke_handler(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 371, in invoke_handler
+    result = await invocation.invoke(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/invocation.py", line 139, in invoke
+    await ...application/json', 'X-Kubernetes-Pf-Flowschema-Uid': '92e01801-f9bf-41cb-8b29-3e19f1aa4f1b', 'X-Kubernetes-Pf-Prioritylevel-Uid': '93502357-3e1c-4aa1-a17f-73a6a3fa4eec', 'Date': 'Tue, 09 Dec 2025 09:45:09 GMT', 'Content-Length': '252'})
+HTTP response body: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"persistentvolumes \"mysql-otus-cr-example-pv\" already exists","reason":"AlreadyExists","details":{"name":"mysql-otus-cr-example-pv","kind":"persistentvolumes"},"code":409}
+  Normal  Logging  8h  kopf  Creating pv, pvc for mysql data and svc...
+  Normal  Logging  8h  kopf  Creating pv, pvc for mysql data and svc...
+  Error   Logging  8h  kopf  Handler 'mysql_on_create' failed with an exception. Will retry.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 276, in execute_handler_once
+    result = await invoke_handler(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 371, in invoke_handler
+    result = await invocation.invoke(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/invocation.py", line 139, in invoke
+    await ...application/json', 'X-Kubernetes-Pf-Flowschema-Uid': '92e01801-f9bf-41cb-8b29-3e19f1aa4f1b', 'X-Kubernetes-Pf-Prioritylevel-Uid': '93502357-3e1c-4aa1-a17f-73a6a3fa4eec', 'Date': 'Tue, 09 Dec 2025 09:46:10 GMT', 'Content-Length': '252'})
+HTTP response body: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"persistentvolumes \"mysql-otus-cr-example-pv\" already exists","reason":"AlreadyExists","details":{"name":"mysql-otus-cr-example-pv","kind":"persistentvolumes"},"code":409}
+  Error  Logging  8h  kopf  Handler 'mysql_on_create' failed with an exception. Will retry.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 276, in execute_handler_once
+    result = await invoke_handler(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 371, in invoke_handler
+    result = await invocation.invoke(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/invocation.py", line 139, in invoke
+    await ...application/json', 'X-Kubernetes-Pf-Flowschema-Uid': '92e01801-f9bf-41cb-8b29-3e19f1aa4f1b', 'X-Kubernetes-Pf-Prioritylevel-Uid': '93502357-3e1c-4aa1-a17f-73a6a3fa4eec', 'Date': 'Tue, 09 Dec 2025 09:47:10 GMT', 'Content-Length': '252'})
+HTTP response body: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"persistentvolumes \"mysql-otus-cr-example-pv\" already exists","reason":"AlreadyExists","details":{"name":"mysql-otus-cr-example-pv","kind":"persistentvolumes"},"code":409}
+  Normal  Logging  8h  kopf  Creating pv, pvc for mysql data and svc...
+  Normal  Logging  8h  kopf  Creating pv, pvc for mysql data and svc...
+  Error   Logging  8h  kopf  Handler 'mysql_on_create' failed with an exception. Will retry.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 276, in execute_handler_once
+    result = await invoke_handler(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 371, in invoke_handler
+    result = await invocation.invoke(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/invocation.py", line 139, in invoke
+    await ...application/json', 'X-Kubernetes-Pf-Flowschema-Uid': '92e01801-f9bf-41cb-8b29-3e19f1aa4f1b', 'X-Kubernetes-Pf-Prioritylevel-Uid': '93502357-3e1c-4aa1-a17f-73a6a3fa4eec', 'Date': 'Tue, 09 Dec 2025 09:48:10 GMT', 'Content-Length': '252'})
+HTTP response body: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"persistentvolumes \"mysql-otus-cr-example-pv\" already exists","reason":"AlreadyExists","details":{"name":"mysql-otus-cr-example-pv","kind":"persistentvolumes"},"code":409}
+  Normal  Logging  8h  kopf  Creating pv, pvc for mysql data and svc...
+  Error   Logging  8h  kopf  Handler 'mysql_on_create' failed with an exception. Will retry.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 276, in execute_handler_once
+    result = await invoke_handler(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 371, in invoke_handler
+    result = await invocation.invoke(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/invocation.py", line 139, in invoke
+    await ...application/json', 'X-Kubernetes-Pf-Flowschema-Uid': '92e01801-f9bf-41cb-8b29-3e19f1aa4f1b', 'X-Kubernetes-Pf-Prioritylevel-Uid': '93502357-3e1c-4aa1-a17f-73a6a3fa4eec', 'Date': 'Tue, 09 Dec 2025 09:49:10 GMT', 'Content-Length': '252'})
+HTTP response body: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"persistentvolumes \"mysql-otus-cr-example-pv\" already exists","reason":"AlreadyExists","details":{"name":"mysql-otus-cr-example-pv","kind":"persistentvolumes"},"code":409}
+  Error  Logging  8h  kopf  Handler 'mysql_on_create' failed with an exception. Will retry.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 276, in execute_handler_once
+    result = await invoke_handler(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 371, in invoke_handler
+    result = await invocation.invoke(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/invocation.py", line 139, in invoke
+    await ...application/json', 'X-Kubernetes-Pf-Flowschema-Uid': '92e01801-f9bf-41cb-8b29-3e19f1aa4f1b', 'X-Kubernetes-Pf-Prioritylevel-Uid': '93502357-3e1c-4aa1-a17f-73a6a3fa4eec', 'Date': 'Tue, 09 Dec 2025 09:50:10 GMT', 'Content-Length': '252'})
+HTTP response body: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"persistentvolumes \"mysql-otus-cr-example-pv\" already exists","reason":"AlreadyExists","details":{"name":"mysql-otus-cr-example-pv","kind":"persistentvolumes"},"code":409}
+  Normal  Logging  8h  kopf  Creating pv, pvc for mysql data and svc...
+  Error   Logging  8h  kopf  Handler 'mysql_on_create' failed with an exception. Will retry.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 276, in execute_handler_once
+    result = await invoke_handler(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 371, in invoke_handler
+    result = await invocation.invoke(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/invocation.py", line 139, in invoke
+    await ...application/json', 'X-Kubernetes-Pf-Flowschema-Uid': '92e01801-f9bf-41cb-8b29-3e19f1aa4f1b', 'X-Kubernetes-Pf-Prioritylevel-Uid': '93502357-3e1c-4aa1-a17f-73a6a3fa4eec', 'Date': 'Tue, 09 Dec 2025 09:51:10 GMT', 'Content-Length': '252'})
+HTTP response body: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"persistentvolumes \"mysql-otus-cr-example-pv\" already exists","reason":"AlreadyExists","details":{"name":"mysql-otus-cr-example-pv","kind":"persistentvolumes"},"code":409}
+  Normal  Logging  8h  kopf  Creating pv, pvc for mysql data and svc...
+  Error   Logging  8h  kopf  Handler 'mysql_on_create' failed with an exception. Will retry.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 276, in execute_handler_once
+    result = await invoke_handler(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 371, in invoke_handler
+    result = await invocation.invoke(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/invocation.py", line 139, in invoke
+    await ...application/json', 'X-Kubernetes-Pf-Flowschema-Uid': '92e01801-f9bf-41cb-8b29-3e19f1aa4f1b', 'X-Kubernetes-Pf-Prioritylevel-Uid': '93502357-3e1c-4aa1-a17f-73a6a3fa4eec', 'Date': 'Tue, 09 Dec 2025 09:52:10 GMT', 'Content-Length': '252'})
+HTTP response body: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"persistentvolumes \"mysql-otus-cr-example-pv\" already exists","reason":"AlreadyExists","details":{"name":"mysql-otus-cr-example-pv","kind":"persistentvolumes"},"code":409}
+  Normal  Logging  8h  kopf  Creating pv, pvc for mysql data and svc...
+  Normal  Logging  8h  kopf  Creating pv, pvc for mysql data and svc...
+  Error   Logging  8h  kopf  Handler 'mysql_on_create' failed with an exception. Will retry.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 276, in execute_handler_once
+    result = await invoke_handler(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 371, in invoke_handler
+    result = await invocation.invoke(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/invocation.py", line 139, in invoke
+    await ...application/json', 'X-Kubernetes-Pf-Flowschema-Uid': '92e01801-f9bf-41cb-8b29-3e19f1aa4f1b', 'X-Kubernetes-Pf-Prioritylevel-Uid': '93502357-3e1c-4aa1-a17f-73a6a3fa4eec', 'Date': 'Tue, 09 Dec 2025 09:53:11 GMT', 'Content-Length': '252'})
+HTTP response body: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"persistentvolumes \"mysql-otus-cr-example-pv\" already exists","reason":"AlreadyExists","details":{"name":"mysql-otus-cr-example-pv","kind":"persistentvolumes"},"code":409}
+  Normal  Logging  8h  kopf  Creating pv, pvc for mysql data and svc...
+  Error   Logging  8h  kopf  Handler 'mysql_on_create' failed with an exception. Will retry.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 276, in execute_handler_once
+    result = await invoke_handler(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 371, in invoke_handler
+    result = await invocation.invoke(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/invocation.py", line 139, in invoke
+    await ...application/json', 'X-Kubernetes-Pf-Flowschema-Uid': '92e01801-f9bf-41cb-8b29-3e19f1aa4f1b', 'X-Kubernetes-Pf-Prioritylevel-Uid': '93502357-3e1c-4aa1-a17f-73a6a3fa4eec', 'Date': 'Tue, 09 Dec 2025 09:54:11 GMT', 'Content-Length': '252'})
+HTTP response body: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"persistentvolumes \"mysql-otus-cr-example-pv\" already exists","reason":"AlreadyExists","details":{"name":"mysql-otus-cr-example-pv","kind":"persistentvolumes"},"code":409}
+  Normal  Logging  8h  kopf  Creating pv, pvc for mysql data and svc...
+  Error   Logging  8h  kopf  Handler 'mysql_on_create' failed with an exception. Will retry.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 276, in execute_handler_once
+    result = await invoke_handler(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 371, in invoke_handler
+    result = await invocation.invoke(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/invocation.py", line 139, in invoke
+    await ...application/json', 'X-Kubernetes-Pf-Flowschema-Uid': '92e01801-f9bf-41cb-8b29-3e19f1aa4f1b', 'X-Kubernetes-Pf-Prioritylevel-Uid': '93502357-3e1c-4aa1-a17f-73a6a3fa4eec', 'Date': 'Tue, 09 Dec 2025 09:55:11 GMT', 'Content-Length': '252'})
+HTTP response body: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"persistentvolumes \"mysql-otus-cr-example-pv\" already exists","reason":"AlreadyExists","details":{"name":"mysql-otus-cr-example-pv","kind":"persistentvolumes"},"code":409}
+  Error  Logging  8h  kopf  Handler 'mysql_on_create' failed with an exception. Will retry.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 276, in execute_handler_once
+    result = await invoke_handler(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 371, in invoke_handler
+    result = await invocation.invoke(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/invocation.py", line 139, in invoke
+    await ...application/json', 'X-Kubernetes-Pf-Flowschema-Uid': '92e01801-f9bf-41cb-8b29-3e19f1aa4f1b', 'X-Kubernetes-Pf-Prioritylevel-Uid': '93502357-3e1c-4aa1-a17f-73a6a3fa4eec', 'Date': 'Tue, 09 Dec 2025 09:56:11 GMT', 'Content-Length': '252'})
+HTTP response body: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"persistentvolumes \"mysql-otus-cr-example-pv\" already exists","reason":"AlreadyExists","details":{"name":"mysql-otus-cr-example-pv","kind":"persistentvolumes"},"code":409}
+  Normal  Logging  8h  kopf  Creating pv, pvc for mysql data and svc...
+  Normal  Logging  8h  kopf  Creating pv, pvc for mysql data and svc...
+  Error   Logging  8h  kopf  Handler 'mysql_on_create' failed with an exception. Will retry.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 276, in execute_handler_once
+    result = await invoke_handler(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 371, in invoke_handler
+    result = await invocation.invoke(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/invocation.py", line 139, in invoke
+    await ...application/json', 'X-Kubernetes-Pf-Flowschema-Uid': '92e01801-f9bf-41cb-8b29-3e19f1aa4f1b', 'X-Kubernetes-Pf-Prioritylevel-Uid': '93502357-3e1c-4aa1-a17f-73a6a3fa4eec', 'Date': 'Tue, 09 Dec 2025 09:56:11 GMT', 'Content-Length': '252'})
+HTTP response body: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"persistentvolumes \"mysql-otus-cr-example-pv\" already exists","reason":"AlreadyExists","details":{"name":"mysql-otus-cr-example-pv","kind":"persistentvolumes"},"code":409}
+  Error  Logging  8h  kopf  Handler 'mysql_on_create' failed with an exception. Will retry.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 276, in execute_handler_once
+    result = await invoke_handler(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 371, in invoke_handler
+    result = await invocation.invoke(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/invocation.py", line 139, in invoke
+    await ...application/json', 'X-Kubernetes-Pf-Flowschema-Uid': '92e01801-f9bf-41cb-8b29-3e19f1aa4f1b', 'X-Kubernetes-Pf-Prioritylevel-Uid': '93502357-3e1c-4aa1-a17f-73a6a3fa4eec', 'Date': 'Tue, 09 Dec 2025 09:57:11 GMT', 'Content-Length': '252'})
+HTTP response body: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"persistentvolumes \"mysql-otus-cr-example-pv\" already exists","reason":"AlreadyExists","details":{"name":"mysql-otus-cr-example-pv","kind":"persistentvolumes"},"code":409}
+  Normal  Logging  8h   kopf  Creating pv, pvc for mysql data and svc...
+  Normal  Logging  16m  kopf  Creating pv, pvc for mysql data and svc...
+  Error   Logging  16m  kopf  Handler 'mysql_on_create' failed with an exception. Will retry.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 276, in execute_handler_once
+    result = await invoke_handler(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 371, in invoke_handler
+    result = await invocation.invoke(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/invocation.py", line 139, in invoke
+    await ...application/json', 'X-Kubernetes-Pf-Flowschema-Uid': '92e01801-f9bf-41cb-8b29-3e19f1aa4f1b', 'X-Kubernetes-Pf-Prioritylevel-Uid': '93502357-3e1c-4aa1-a17f-73a6a3fa4eec', 'Date': 'Tue, 09 Dec 2025 17:44:53 GMT', 'Content-Length': '252'})
+HTTP response body: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"persistentvolumes \"mysql-otus-cr-example-pv\" already exists","reason":"AlreadyExists","details":{"name":"mysql-otus-cr-example-pv","kind":"persistentvolumes"},"code":409}
+  Normal  Logging  15m  kopf  Creating pv, pvc for mysql data and svc...
+  Error   Logging  15m  kopf  Handler 'mysql_on_create' failed with an exception. Will retry.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 276, in execute_handler_once
+    result = await invoke_handler(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 371, in invoke_handler
+    result = await invocation.invoke(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/invocation.py", line 139, in invoke
+    await ...application/json', 'X-Kubernetes-Pf-Flowschema-Uid': '92e01801-f9bf-41cb-8b29-3e19f1aa4f1b', 'X-Kubernetes-Pf-Prioritylevel-Uid': '93502357-3e1c-4aa1-a17f-73a6a3fa4eec', 'Date': 'Tue, 09 Dec 2025 17:45:53 GMT', 'Content-Length': '252'})
+HTTP response body: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"persistentvolumes \"mysql-otus-cr-example-pv\" already exists","reason":"AlreadyExists","details":{"name":"mysql-otus-cr-example-pv","kind":"persistentvolumes"},"code":409}
+  Normal  Logging  14m  kopf  Creating pv, pvc for mysql data and svc...
+  Error   Logging  14m  kopf  Handler 'mysql_on_create' failed with an exception. Will retry.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 276, in execute_handler_once
+    result = await invoke_handler(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 371, in invoke_handler
+    result = await invocation.invoke(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/invocation.py", line 139, in invoke
+    await ...application/json', 'X-Kubernetes-Pf-Flowschema-Uid': '92e01801-f9bf-41cb-8b29-3e19f1aa4f1b', 'X-Kubernetes-Pf-Prioritylevel-Uid': '93502357-3e1c-4aa1-a17f-73a6a3fa4eec', 'Date': 'Tue, 09 Dec 2025 17:46:53 GMT', 'Content-Length': '252'})
+HTTP response body: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"persistentvolumes \"mysql-otus-cr-example-pv\" already exists","reason":"AlreadyExists","details":{"name":"mysql-otus-cr-example-pv","kind":"persistentvolumes"},"code":409}
+  Normal  Logging  13m  kopf  Creating pv, pvc for mysql data and svc...
+  Error   Logging  13m  kopf  Handler 'mysql_on_create' failed with an exception. Will retry.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 276, in execute_handler_once
+    result = await invoke_handler(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/execution.py", line 371, in invoke_handler
+    result = await invocation.invoke(
+  File "/usr/local/lib/python3.10/site-packages/kopf/_core/actions/invocation.py", line 139, in invoke
+    await ...application/json', 'X-Kubernetes-Pf-Flowschema-Uid': '92e01801-f9bf-41cb-8b29-3e19f1aa4f1b', 'X-Kubernetes-Pf-Prioritylevel-Uid': '93502357-3e1c-4aa1-a17f-73a6a3fa4eec', 'Date': 'Tue, 09 Dec 2025 17:47:53 GMT', 'Content-Length': '252'})
+HTTP response body: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"persistentvolumes \"mysql-otus-cr-example-pv\" already exists","reason":"AlreadyExists","details":{"name":"mysql-otus-cr-example-pv","kind":"persistentvolumes"},"code":409}

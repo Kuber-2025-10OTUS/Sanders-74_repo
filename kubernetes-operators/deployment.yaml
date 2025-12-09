@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mysql-operator-deployment
-  namespace: homework
+#  namespace: homework
   labels:
     user: Schneider.Alex
     task: Homework.8
@@ -18,7 +18,7 @@ spec:
     
   template:
     metadata:
-      namespace: homework
+#      namespace: homework
       labels:
         app: 'mysql-operator'
       annotations:
