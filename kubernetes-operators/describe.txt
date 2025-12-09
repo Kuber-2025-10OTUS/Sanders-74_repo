@@ -1,0 +1,18 @@
+minikube start
+
+запускаем наши манифесты
+cd ./kubernetes-operators/
+
+k apply -f SAmysqloprtr.yaml
+k apply -f ClusterRole.yaml
+k apply -f RoleBindings.yaml
+k apply -f deployment.yaml
+
+
+смотрим результат 
+k get po -n homework
+
+NAME                                         READY   STATUS    RESTARTS   AGE
+mysql-operator-deployment-5847cc789b-rvhr7   1/1     Running   0          30s
+
+

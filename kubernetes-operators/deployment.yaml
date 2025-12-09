@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-operator-deployment
+  namespace: homework
+  labels:
+    user: Schneider.Alex
+    task: Homework.8
+    course: Kubernetes-platform
+    university: Otus
+    executionDate: 07.12.2025
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: 'mysql-operator'
+    
+  template:
+    metadata:
+      namespace: homework
+      labels:
+        app: 'mysql-operator'
+      annotations:
+        kubectl.kubernetes.io/default-container: "mysql-operator" 
+    spec:
+      serviceAccountName: mysqloprtr
+      containers:
+      - name: mysqloprtr
+        image: roflmaoinmysoul/mysql-operator:1.0.0
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: WATCH_NAMESPACE
+          value: "homework"  # Пустая строка для наблюдения за всем кластером
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: OPERATOR_NAME
+          value: "mysql-operator"
