@@ -21,19 +21,32 @@ kubectl delete mysql mysql-otus-cr-example -n homework
 после этого удалился cr
 #k patch -f ./crd.yaml -p '{"metadata":{"finalizers":[]}}' --type=merge
 
+в итоге я понял что данный оператор работает только в пространстве имен  default - переделал манифесты и все заработало
 
 смотрим результат 
-k get po -n homework
+
+k get pods -n default
 
 NAME                                         READY   STATUS    RESTARTS   AGE
-mysql-operator-deployment-5847cc789b-rvhr7   1/1     Running   0          30s
+mysql-operator-deployment-78df96d868-j8dxw   1/1     Running   0          3m58s
+mysql-otus-cr-example-6c576747fd-tvfdd       1/1     Running   0          3m57s
+
 
 проверяем выделение PV
 k get pv | grep mysql-otus-cr-example
 
-k delete pv mysql-otus-cr-example-pv  
+mysql-otus-cr-example-pv   10Gi       RWO            Retain           Bound    default/mysql-otus-cr-example-pvc   standard       <unset>                          2m26s
+
 
 # Проверьте PersistentVolumeClaims
-k get pvc -n homework | grep mysql-otus-cr-example
+k get pvc | grep mysql-otus-cr-example
+
+mysql-otus-cr-example-pvc   Bound    mysql-otus-cr-example-pv   10Gi       RWO            standard       <unset>                 3m
 
 k describe mysqls mysql-otus-cr-example 
+
+
+оператор и MySQL работают без ошибок
+
+
+

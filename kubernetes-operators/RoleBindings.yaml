@@ -5,7 +5,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: mysqloprtr
-  namespace: homework
+  namespace: default
 roleRef:
   kind: ClusterRole
   name: mysqloprtr-role
