@@ -1,0 +1,9 @@
+apiVersion: "otus.homework/v1"
+kind: "MySQL"
+metadata:
+  name: "mysql-otus-cr-example"
+spec:
+  image: "mysql:8.0"
+  database: "mysql_otusdatabase"
+  password: "mysql_secure_password"
+  storage_size: "10Gi"

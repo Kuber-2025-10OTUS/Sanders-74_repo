@@ -1,0 +1,52 @@
+minikube start
+
+запускаем наши манифесты
+cd ./kubernetes-operators/
+
+k apply -f SAmysqloprtr.yaml
+k apply -f ClusterRole.yaml
+k apply -f RoleBindings.yaml
+k apply -f crd.yaml
+k apply -f deployment.yaml
+k apply -f cr.yaml
+
+
+в ходе отладки я понял, что не удаляется cr.  даже если дать команду... Просто висит и все.  
+
+Нашел решение:  
+k scale -f ./deployment.yaml --replicas=0 -n homework
+kubectl patch mysql mysql-otus-cr-example -n homework --type=json -p='[{"op": "remove", "path": "/metadata/finalizers"}]'
+kubectl delete mysql mysql-otus-cr-example -n homework
+
+после этого удалился cr
+#k patch -f ./crd.yaml -p '{"metadata":{"finalizers":[]}}' --type=merge
+
+в итоге я понял что данный оператор работает только в пространстве имен  default - переделал манифесты и все заработало
+
+смотрим результат 
+
+k get pods -n default
+
+NAME                                         READY   STATUS    RESTARTS   AGE
+mysql-operator-deployment-78df96d868-j8dxw   1/1     Running   0          3m58s
+mysql-otus-cr-example-6c576747fd-tvfdd       1/1     Running   0          3m57s
+
+
+проверяем выделение PV
+k get pv | grep mysql-otus-cr-example
+
+mysql-otus-cr-example-pv   10Gi       RWO            Retain           Bound    default/mysql-otus-cr-example-pvc   standard       <unset>                          2m26s
+
+
+# Проверьте PersistentVolumeClaims
+k get pvc | grep mysql-otus-cr-example
+
+mysql-otus-cr-example-pvc   Bound    mysql-otus-cr-example-pv   10Gi       RWO            standard       <unset>                 3m
+
+k describe mysqls mysql-otus-cr-example 
+
+
+оператор и MySQL работают без ошибок
+
+
+
