@@ -1,0 +1,6 @@
+dependencies:
+- name: mysql
+  repository: file:///home/alex/repos/Sanders-74_repo/kubernetes-templating/nginx-service/charts/mysql
+  version: 1.6.9
+digest: sha256:5ad70996d05039bcec0e99d8cff459a9e760f8d066065debaea089329517afda
+generated: "2025-12-19T08:25:26.858010058+03:00"
