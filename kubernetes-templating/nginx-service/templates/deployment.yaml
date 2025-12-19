@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "nginx-service.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "nginx-service.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "nginx-service.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      namespace: {{ .Release.Namespace }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "nginx-service.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "nginx-service.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: {{ .Values.fullnameOverride }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          
+        command: ["/bin/sh", "-c"]
+        args:
+        - sed -i 's|root   /usr/share/nginx/html|root   /homework|g' /etc/nginx/conf.d/default.conf
+          && nginx -g 'daemon off;'
+
+        ports:
+        - name: {{ .Values.deploymentport.name }}
+          containerPort: {{ .Values.deploymentport.containerPort }}
+        {{- with .Values.volumeMounts }}
+        volumeMounts:
+        {{- toYaml . | nindent 8 }}
+        {{- end }}  
+#          volumeMounts:
+#          - name: sharedcatalog
+#            mountPath: /homework
+#          - name: config-volume
+#            mountPath: /homework/conf
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - rm /homework/index.html
+        {{- if .Values.Probes.enabled }}
+        {{- with .Values.readinessProbe }}
+        readinessProbe:
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+        {{- end }}  
+      initContainers:
+      - name: {{ .Values.fullnameOverride }}-init
+        image: "{{ .Values.initimage.repository }}:{{ .Values.initimage.tag | default .Chart.AppVersion }}"
+        
+        command:
+        - wget
+        - "-O"
+        - "/init/index.html"
+        - https://line-mode.cern.ch/www/hypertext/WWW/TheProject.html
+        volumeMounts:
+        - name: nginxapp-sharedcatalog
+          mountPath: /init
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml  . | nindent 8 }}
+      {{- end }}      
+      {{- with .Values.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}      

@@ -1,0 +1,87 @@
+minikube start
+
+cd ~/repos/Sanders-74_repo/kubernetes-templating
+
+helm create nginx-service
+
+после редактирования файлов
+
+helm repo add wso2 https://helm.wso2.com
+
+helm repo update
+
+helm pull wso2/mysql --version 1.6.9 --untar --untardir ./charts
+
+helm dependency update
+Hang tight while we grab the latest from your chart repositories...
+...Successfully got an update from the "wso2" chart repository
+Update Complete. ⎈Happy Helming!⎈
+Saving 1 charts
+Deleting outdated charts
+
+
+
+проверка
+
+helm install --dry-run test1-release -n homework  ./nginx-service
+
+После выполнения команды получил тексты манифестов и Notes
+
+NOTES:
+1. Get the application URL by running these commands:
+  export POD_NAME=$(kubectl get pods --namespace homework -l "app.kubernetes.io/name=nginxapp,app.kubernetes.io/instance=test1-release" -o jsonpath="{.items[0].metadata.name}")
+  export CONTAINER_PORT=$(kubectl get pod --namespace homework $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
+  echo "Visit http://127.0.0.1:8080 to use your application"
+  kubectl --namespace homework port-forward $POD_NAME 8080:$CONTAINER_PORT
+
+
+helm install test1-release -n homework  ./nginx-service
+NAME: test1-release
+LAST DEPLOYED: Fri Dec 19 08:45:13 2025
+NAMESPACE: homework
+STATUS: deployed
+REVISION: 1
+NOTES:
+1. Get the application URL by running these commands:
+  export POD_NAME=$(kubectl get pods --namespace homework -l "app.kubernetes.io/name=nginxapp,app.kubernetes.io/instance=test1-release" -o jsonpath="{.items[0].metadata.name}")
+  export CONTAINER_PORT=$(kubectl get pod --namespace homework $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
+  echo "Visit http://127.0.0.1:8080 to use your application"
+  kubectl --namespace homework port-forward $POD_NAME 8080:$CONTAINER_PORT
+
+проверяем запустились поды
+k get po -n homework
+NAME                                   READY   STATUS    RESTARTS   AGE
+nginxapp-service-b5f6d97d-6fpmq        1/1     Running   0          46s
+nginxapp-service-b5f6d97d-g4lsg        1/1     Running   0          46s
+nginxapp-service-b5f6d97d-n924s        1/1     Running   0          46s
+test1-release-mysql-7988c6f654-99g9l   1/1     Running   0          46s
+
+
+выполняем команду 
+export POD_NAME=$(kubectl get pods --namespace homework -l "app.kubernetes.io/name=nginxapp,app.kubernetes.io/instance=test1-release" -o jsonpath="{.items[0].metadata.name}")
+~/repos/Sanders-74_repo/kubernetes-templating [kubernetes-templating] $ export CONTAINER_PORT=$(kubectl get pod --namespace homework $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
+~/repos/Sanders-74_repo/kubernetes-templating [kubernetes-templating] $ kubectl --namespace homework port-forward $POD_NAME 8080:$CONTAINER_PORT
+Forwarding from 127.0.0.1:8080 -> 80
+Forwarding from [::1]:8080 -> 80
+Handling connection for 8080
+
+
+обращаемся к сервису
+
+curl http://127.0.0.1:8080
+
+выдает скачанный index.html
+
+curl http://127.0.0.1:8080
+<html><head></head><body><link class="ignore" rel="stylesheet" href="/css/linemode.css" type="text/css"><header>
+<title>The World Wide Web project</title>
+<nextid n="55">
+</nextid></header>
+
+<h1>World Wide Web</h1>The WorldWideWeb (W3) is a wide-area<a name="0" href="WhatIs.html">
+hypermedia[1]</a> information retrieval
+initiative aiming to give universal
+access to a large universe of documents.<p>
+Everything there is online about
+W3 is linked directly or indirectly
+to this document, including an <a name="24" href="Summary.html">executive
