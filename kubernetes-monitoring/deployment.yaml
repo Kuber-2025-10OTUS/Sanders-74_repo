@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  namespace: homework
+  labels:
+    user: Schneider.Alex
+    task: Homework.8
+    course: Kubernetes-platform
+    university: Otus
+    executionDate: 22.12.2025
+    app: nginx-monitoring
+
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: 'nginx-monitoring'
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  template:
+    metadata:
+      name: nginx
+      namespace: homework
+      labels:
+        app: 'nginx-monitoring'
+      annotations:
+        kubectl.kubernetes.io/default-container: "nginx" 
+    spec:
+      containers:
+      - name: nginx
+        image: nginxstub:1.29.4
+        ports:
+        - name: nginxport
+          containerPort: 80
+
+        volumeMounts:
+        - name: mynginxcatalog
+          mountPath: /usr/share/nginx/html
+        readinessProbe:
+          periodSeconds: 5
+          httpGet:
+            path: /
+            port: nginxport
+
+      - name: exporter
+        image: nginx/nginx-prometheus-exporter:1.5.1
+        ports:
+        - containerPort: 9113
+          name: http-metrics
+        env:
+        - name: nginx.scrape-uri
+          value: "http://localhost:80/stub_status"
+
+      volumes:
+      - name: mynginxcatalog
+        emptyDir: {}
