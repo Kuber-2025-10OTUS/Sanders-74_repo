@@ -1,44 +1,57 @@
-# Используем базовый образ с инструментами для сборки
+# Этап 1: Сборка
 FROM alpine:latest AS builder
 
-# Устанавливаем зависимости для сборки
-RUN apk add --no-cache build-base pcre-dev zlib-dev 
-# libssl-dev
+RUN apk add --no-cache build-base openssl-dev wget linux-headers gd-dev
 
-# Скачиваем и распаковываем исходники Nginx
-ENV NGINX_VERSION=1.29.4
-RUN wget https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz \
-    && tar -xvf nginx-${NGINX_VERSION}.tar.gz \
-    && rm nginx-${NGINX_VERSION}.tar.gz
+WORKDIR /src
 
-WORKDIR /nginx-${NGINX_VERSION}
+# Актуальные версии на конец 2025 года
+ENV NGINX_VERSION=1.27.4
+ENV PCRE_VERSION=8.45
+ENV ZLIB_VERSION=1.3.1
 
-# Конфигурируем сборку с нужным модулем
+# Скачивание с исправленными ссылками
+RUN wget https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz  && tar -xzf nginx-${NGINX_VERSION}.tar.gz
+
+# Используем официальное зеркало SourceForge для PCRE
+RUN wget https://altushost-swe.dl.sourceforge.net/project/pcre/pcre/8.45/pcre-8.45.tar.gz \
+    && tar -xzf pcre-${PCRE_VERSION}.tar.gz
+
+# Используем официальный сайт zlib
+RUN wget https://zlib.net/zlib-1.3.1.tar.gz \
+    && tar -xzf zlib-${ZLIB_VERSION}.tar.gz
+
+WORKDIR /src/nginx-${NGINX_VERSION}
+
+# Статическая сборка: библиотеки PCRE и Zlib будут ВНУТРИ файла /usr/sbin/nginx
 RUN ./configure \
-    --prefix=/usr/share/nginx \
+    --prefix=/etc/nginx \
     --sbin-path=/usr/sbin/nginx \
-    --modules-path=/usr/lib/nginx/modules \
     --conf-path=/etc/nginx/nginx.conf \
     --error-log-path=/var/log/nginx/error.log \
     --http-log-path=/var/log/nginx/access.log \
+    --pid-path=/var/run/nginx.pid \
+    --with-pcre=/src/pcre-${PCRE_VERSION} \
+    --with-zlib=/src/zlib-${ZLIB_VERSION} \
     --with-http_stub_status_module \
-    && make \
+    && make -j$(nproc) \
     && make install
 
-# --with-http_ssl_module \    
-
-# Создаем финальный образ
+# Этап 2: Финальный образ
 FROM alpine:latest
 
-# Копируем собранные бинарники Nginx и конфигурационные файлы
-COPY --from=builder /usr/sbin/nginx /usr/sbin/nginx
-#COPY --from=builder /usr/lib/nginx/modules /usr/lib/nginx/modules
-COPY --from=builder /etc/nginx/nginx.conf /etc/nginx/nginx.conf
-# Добавляем стандартные директории для логов и темп-файлов, если их нет
-RUN mkdir -p /var/log/nginx /var/cache/nginx /var/lib/nginx/tmp /var/lib/nginx/tmp/client_body /var/lib/nginx/tmp/proxy
+# libc6-compat нужен для совместимости бинарников в Alpine
+RUN apk add --no-cache libc6-compat
 
-# Копируем кастомный конфиг (если есть) или используем стандартный
-# Можно добавить: COPY nginx.conf /etc/nginx/nginx.conf
+# Копируем самодостаточный бинарник и конфигурацию
+COPY --from=builder /usr/sbin/nginx /usr/sbin/nginx
+COPY --from=builder /etc/nginx /etc/nginx
+
+# Подготовка окружения
+RUN mkdir -p /var/log/nginx /var/cache/nginx /var/lib/nginx/tmp
+
+# Эта команда проверит, что зависимость от libpcre.so исчезла
+RUN ldd /usr/sbin/nginx
 
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

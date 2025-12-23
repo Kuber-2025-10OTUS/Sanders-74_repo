@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
       - name: nginx
-        image: nginxstub:1.29.4
+        image: ghcr.io/sanders-74/nginxstub:1.27.4
         ports:
         - name: nginxport
           containerPort: 80
