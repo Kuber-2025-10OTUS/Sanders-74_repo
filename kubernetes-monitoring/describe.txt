@@ -1,0 +1,118 @@
+minikube start
+kubectl create namespace monitoring
+
+
+helm install prometheus-operator oci://ghcr.io/prometheus-community/charts/kube-prometheus-stack --version 69.x.x -n homework
+
+helm install prometheus-operator  oci://ghcr.io/prometheus-community/charts/prometheus-operator-crds -n homework
+helm install prometheus-operator-crds -n homework oci://ghcr.io/prometheus-community/charts/prometheus-operator-crds
+
+$ helm list -A
+NAME                            NAMESPACE       REVISION        UPDATED                                 STATUS          CHART                           APP VERSION
+prometheus-operator             homework        1               2025-12-25 19:58:54.590335057 +0300 MSK deployed        kube-prometheus-stack-69.8.2    v0.80.1    
+prometheus-operator-crds        homework        1               2025-12-28 13:57:01.075054305 +0300 MSK deployed        prometheus-operator-crds-25.0.1 v0.87.1  
+
+helm status prometheus-operator -n homework
+NAME: prometheus-operator
+LAST DEPLOYED: Thu Dec 25 19:58:54 2025
+NAMESPACE: homework
+STATUS: deployed
+REVISION: 1
+NOTES:
+kube-prometheus-stack has been installed. Check its status by running:
+  kubectl --namespace homework get pods -l "release=prometheus-operator"
+
+Get Grafana 'admin' user password by running:
+
+  kubectl --namespace homework get secrets prometheus-operator-grafana -o jsonpath="{.data.admin-password}" | base64 -d ; echo
+
+Access Grafana local instance:
+
+  export POD_NAME=$(kubectl --namespace homework get pod -l "app.kubernetes.io/name=grafana,app.kubernetes.io/instance=prometheus-operator" -oname)
+  kubectl --namespace homework port-forward $POD_NAME 3000
+
+Visit https://github.com/prometheus-operator/kube-prometheus for instructions on how to create & configure Alertmanager and Prometheus instances using the Operator.
+
+собираем образ nginx и сохраняем его в github registry
+./buildNginxImg.sh
+
+делаем образ public https://github.com/users/Sanders-74/packages/container/nginxstub/settings
+
+k apply -f ./deployment.yaml --dry-run=server
+deployment.apps/nginx-deployment created (server dry run)
+
+k apply -f ./deployment.yaml
+
+k apply -f ./service.yaml
+
+k apply -f ./serviceMonitor.yaml
+
+$ k port-forward svc/nginx-monitoring-service -n homework 9113:9113
+Forwarding from 127.0.0.1:9113 -> 9113
+Forwarding from [::1]:9113 -> 9113
+Handling connection for 9113
+Handling connection for 9113
+
+curl http://localhost:9113
+
+}
+main {
+  padding: 1rem;
+}
+label {
+  display: inline-block;
+  width: 0.5em;
+}
+#pprof {
+  border: black 2px solid;
+  padding: 1rem;
+  width: fit-content;
+}
+
+</style>
+  </head>
+  <body>
+    <header>
+      <h1>NGINX Prometheus Exporter</h1>
+    </header>
+    <main>
+      <h2>Prometheus Exporter for NGINX and NGINX Plus</h2>
+      <div>Version: (version=0.0.0-SNAPSHOT-bae43bc, branch=main, revision=bae43bc818cd6e47a08163a7b31f355f454e9ecb)</div>
+      <div>
+        <ul>
+          
+          <li><a href="/metrics">Metrics</a></li>
+          
+        </ul>
+      </div>
+      
+      
+      
+      <div id="pprof">
+      Download a detailed report of resource usage (pprof format, from the Go runtime):
+      <ul>
+        <li><a href="/debug/pprof/heap">heap usage (memory)</a>
+        <li><a href="/debug/pprof/profile?seconds=60">CPU usage (60 second profile)</a>
+      </ul>
+      To visualize and share profiles you can upload to <a href="https://pprof.me" target="_blank" rel="noopener noreferrer">pprof.me</a>
+      </div>
+      
+    </main>
+  </body>
+</html>
+
+
+$ curl http://localhost:9113/metrics
+# HELP go_gc_duration_seconds A summary of the wall-time pause (stop-the-world) duration in garbage collection cycles.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{quantile="0"} 0
+go_gc_duration_seconds{quantile="0.25"} 0
+go_gc_duration_seconds{quantile="0.5"} 0
+go_gc_duration_seconds{quantile="0.75"} 0
+go_gc_duration_seconds{quantile="1"} 0
+go_gc_duration_seconds_sum 0
+go_gc_duration_seconds_count 0
+# HELP go_gc_gogc_percent Heap size target percentage configured by the user, otherwise 100. This value is set by the GOGC environment variable, and the runtime/debug.SetGCPercent function. Sourced from /gc/gogc:percent.
+# TYPE go_gc_gogc_percent gauge
+go_gc_gogc_percent 100
+
