@@ -1,0 +1,31 @@
+# my-custom-loki-values.yaml
+# Tolerations позволяют поду назначаться на узлы с taints
+tolerations:
+  - key: "node-role"      # Ключ тайнта на узле
+    operator: "Equal"      # Может быть "Exists" или "Equal"
+    value: "infra:NO_SCHEDULE"  # Значение тайнта
+    effect: "NoSchedule"   # Эффект (NoSchedule, PreferNoSchedule или NoExecute)
+
+# Affinity (nodeAffinity) притягивает под к конкретным узлам
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: noderole
+              operator: In
+              values: infra
+
+storage:
+  type: s3
+  bucketNames:
+    chunks: loggingbucket
+    ruler: loggingbucket
+    admin: loggingbucket
+  s3:
+    endpoint: "https://storage.yandexcloud.net" # Yandex Object Storage endpoint
+    region: "us-east-1" # Yandex Object Storage uses us-east-1 as default region
+    accessKeyId: YCAJExIC0-XS-kLvjlE_tbmnZ # It's better to use secrets for this
+    secretAccessKey: YCP2TD-RGeF8loL4xGQAnjbxRjXPIy_Vt10iYV8U # It's better to use secrets for this
+    s3ForcePathStyle: true # Use path-style access (required for S3 compatible storage)
+    insecure: true

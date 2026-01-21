@@ -1,0 +1,83 @@
+Создал кластер  
+установил yandex CLI
+нашел свой Yandex OATH token
+создал кластер
+выполнил команду yc managed-kubernetes cluster get-credentials k8s-otuslogging --external
+ yc managed-kubernetes cluster get-credentials и настроил kubectl для работы с этим кластером
+
+k config use-context yc-k8s-otuslogging
+
+$ k get node -o wide --show-labels
+NAME                        STATUS   ROLES    AGE   VERSION   INTERNAL-IP   EXTERNAL-IP      OS-IMAGE             KERNEL-VERSION       CONTAINER-RUNTIME     LABELS
+cl18v7tjaupt72pegp0n-ixan   Ready    <none>   19m   v1.32.1   10.129.0.34   158.160.80.202   Ubuntu 22.04.5 LTS   5.15.0-161-generic   containerd://1.7.27   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/instance-type=standard-v3,beta.kubernetes.io/os=linux,failure-domain.beta.kubernetes.io/zone=ru-central1-b,kubernetes.io/arch=amd64,kubernetes.io/hostname=cl18v7tjaupt72pegp0n-ixan,kubernetes.io/os=linux,node.kubernetes.io/instance-type=standard-v3,node.kubernetes.io/kube-proxy-ds-ready=true,node.kubernetes.io/masq-agent-ds-ready=true,node.kubernetes.io/node-problem-detector-ds-ready=true,topology.kubernetes.io/zone=ru-central1-b,yandex.cloud/node-group-id=cateb0guuir5oaa7ovcg,yandex.cloud/pci-topology=k8s,yandex.cloud/preemptible=false
+cl1ic331t28095jodvt9-odif   Ready    <none>   19m   v1.32.1   10.129.0.7    158.160.93.207   Ubuntu 22.04.5 LTS   5.15.0-161-generic   containerd://1.7.27   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/instance-type=standard-v3,beta.kubernetes.io/os=linux,failure-domain.beta.kubernetes.io/zone=ru-central1-b,kubernetes.io/arch=amd64,kubernetes.io/hostname=cl1ic331t28095jodvt9-odif,kubernetes.io/os=linux,node.kubernetes.io/instance-type=standard-v3,node.kubernetes.io/kube-proxy-ds-ready=true,node.kubernetes.io/masq-agent-ds-ready=true,node.kubernetes.io/node-problem-detector-ds-ready=true,topology.kubernetes.io/zone=ru-central1-b,yandex.cloud/node-group-id=cat0de3i8m1afrf24msa,yandex.cloud/pci-topology=k8s,yandex.cloud/preemptible=false
+
+k get nodes -o custom-columns=NAME:.metadata.name,TAINTS:.spec.taints
+NAME                        TAINTS
+cl18v7tjaupt72pegp0n-ixan   [map[effect:NoSchedule key:node-role value:infra]]
+cl1ic331t28095jodvt9-odif   <none>
+
+присвоил метки нодам 
+
+$ k label node cl18v7tjaupt72pegp0n-ixan noderole=infra
+node/cl18v7tjaupt72pegp0n-ixan labeled
+$ k label node cl1ic331t28095jodvt9-odif noderole=work
+node/cl1ic331t28095jodvt9-odif labeled
+
+k get node -o wide --show-labels
+NAME                        STATUS   ROLES    AGE   VERSION   INTERNAL-IP   EXTERNAL-IP      OS-IMAGE             KERNEL-VERSION       CONTAINER-RUNTIME     LABELS
+cl18v7tjaupt72pegp0n-ixan   Ready    <none>   25m   v1.32.1   10.129.0.34   158.160.80.202   Ubuntu 22.04.5 LTS   5.15.0-161-generic   containerd://1.7.27   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/instance-type=standard-v3,beta.kubernetes.io/os=linux,failure-domain.beta.kubernetes.io/zone=ru-central1-b,kubernetes.io/arch=amd64,kubernetes.io/hostname=cl18v7tjaupt72pegp0n-ixan,kubernetes.io/os=linux,node.kubernetes.io/instance-type=standard-v3,node.kubernetes.io/kube-proxy-ds-ready=true,node.kubernetes.io/masq-agent-ds-ready=true,node.kubernetes.io/node-problem-detector-ds-ready=true,noderole=infra,topology.kubernetes.io/zone=ru-central1-b,yandex.cloud/node-group-id=cateb0guuir5oaa7ovcg,yandex.cloud/pci-topology=k8s,yandex.cloud/preemptible=false
+cl1ic331t28095jodvt9-odif   Ready    <none>   25m   v1.32.1   10.129.0.7    158.160.93.207   Ubuntu 22.04.5 LTS   5.15.0-161-generic   containerd://1.7.27   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/instance-type=standard-v3,beta.kubernetes.io/os=linux,failure-domain.beta.kubernetes.io/zone=ru-central1-b,kubernetes.io/arch=amd64,kubernetes.io/hostname=cl1ic331t28095jodvt9-odif,kubernetes.io/os=linux,node.kubernetes.io/instance-type=standard-v3,node.kubernetes.io/kube-proxy-ds-ready=true,node.kubernetes.io/masq-agent-ds-ready=true,node.kubernetes.io/node-problem-detector-ds-ready=true,noderole=work,topology.kubernetes.io/zone=ru-central1-b,yandex.cloud/node-group-id=cat0de3i8m1afrf24msa,yandex.cloud/pci-topology=k8s,yandex.cloud/preemptible=false
+
+создал сервисный акк s3account.  Создал для него пару статических ключей.
+привязал акк к созданному бакету loggingbucket с ролью editor
+
+командой yc iam access-key create --service-account-name=s3account  --format=json > sa-key.json  создал json ключ.  
+
+cd ~/repo
+helm pull oci://cr.yandex/yc-marketplace/yandex-cloud/grafana/loki/chart/loki  --version 1.2.0-7 --untar 
+скачал и развернул в каталог loki
+установил loki в кластере  
+
+
+helm install   --namespace loki-ns  --create-namespace  --set global.bucketname=loggingbucket   --set-file global.serviceaccountawskeyvalue=/home/alex/repos/Sanders-74_repo/kubernetes-logging/sa-key.json  loki ./loki -f ./Sanders-74_repo/kubernetes-logging/my-custom-loki-values.yaml
+
+NAME: loki
+LAST DEPLOYED: Wed Jan 21 08:15:25 2026
+NAMESPACE: loki-ns
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+
+добавил настройку на s3 бакет в values.yaml
+апрогрейднул 
+
+helm upgrade --namespace loki-ns loki ./loki -f ./Sanders-74_repo/kubernetes-logging/my-custom-loki-values.yaml
+Release "loki" has been upgraded. Happy Helming!
+NAME: loki
+LAST DEPLOYED: Wed Jan 21 09:26:12 2026
+NAMESPACE: loki-ns
+STATUS: deployed
+REVISION: 2
+TEST SUITE: None
+
+
+$ k get po -n loki-ns -o wide
+NAME                                                    READY   STATUS    RESTARTS   AGE     IP              NODE                        NOMINATED NODE   READINESS GATES
+loki-loki-distributed-distributor-846b58d5f5-t9rq8      1/1     Running   0          2m27s   10.112.128.11   cl1ic331t28095jodvt9-odif   <none>           <none>
+loki-loki-distributed-gateway-74bb5d4956-wpfms          1/1     Running   0          2m27s   10.112.128.9    cl1ic331t28095jodvt9-odif   <none>           <none>
+loki-loki-distributed-ingester-0                        1/1     Running   0          2m26s   10.112.128.13   cl1ic331t28095jodvt9-odif   <none>           <none>
+loki-loki-distributed-querier-0                         1/1     Running   0          2m26s   10.112.128.12   cl1ic331t28095jodvt9-odif   <none>           <none>
+loki-loki-distributed-query-frontend-5cb7c5698c-jqqnz   1/1     Running   0          2m27s   10.112.128.10   cl1ic331t28095jodvt9-odif   <none>           <none>
+loki-promtail-jb86m                                     1/1     Running   0          2m27s   10.112.128.8    cl1ic331t28095jodvt9-odif   <none>           <none>
+
+ставим grafana
+
+helm repo add grafana https://grafana.github.io/helm-charts
+
+helm repo update
+
+helm install --namespace grafana-ns --create-namespace my-grafana grafana/grafana 
+
+получаем пароль от графаны  
+kubectl get secret --namespace grafana-ns my-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
