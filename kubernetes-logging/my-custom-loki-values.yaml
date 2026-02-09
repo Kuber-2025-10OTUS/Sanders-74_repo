@@ -1,11 +1,50 @@
 # my-custom-loki-values.yaml
-# Tolerations позволяют поду назначаться на узлы с taints
-tolerations:
-  - key: "node-role"      # Ключ тайнта на узле
-    operator: "Equal"      # Может быть "Exists" или "Equal"
-    value: "infra:NO_SCHEDULE"  # Значение тайнта
-    effect: "NoSchedule"   # Эффект (NoSchedule, PreferNoSchedule или NoExecute)
+deploymentMode: SingleBinary
+loki:
+  auth_enabled: false
+  server:
+    log_level: debug
+  analytics:
+    reporting_enabled: false  
+  schemaConfig:
+    configs:
+      - from: "2024-01-01"    # Дата начала использования этой схемы
+        store: tsdb           # Тип хранилища индекса (рекомендуется tsdb для новых версий)
+        object_store: s3      # Где лежат сами данные (S3, GCS, filesystem и т.д.)
+        schema: v13           # Версия схемы Loki
+        index:
+          prefix: index_      # Префикс имен таблиц индекса
+          period: 24h         # Длительность одной таблицы индекса
+  commonConfig:
+    replication_factor: 1
+    ring:
+      kvstore:
+        store: memberlist
+  
+  # Явное указание memberlist для Single Binary
+  memberlist:
+    join_members:
+      - loki.loki-ns.svc.cluster.local 
 
+  storage:
+    type: s3
+    bucketNames:
+      chunks: loggingbucket
+      ruler: loggingbucket
+      admin: loggingbucket
+    s3:
+      endpoint: storage.yandexcloud.net
+      region: ru-central1
+      accessKeyId: "YCAJExIC0-XS-kLvjlE_tbmnZ"
+      secretAccessKey: "YCP2TD-RGeF8loL4xGQAnjbxRjXPIy_Vt10iYV8U"
+      s3ForcePathStyle: true
+      insecure: false
+      # Добавьте это, если чарт позволяет прокинуть доп. настройки:
+      http_config:
+        idle_conn_timeout: 90s
+        insecure_skip_verify: false
+
+# Tolerations позволяют поду назначаться на узлы с taints
 # Affinity (nodeAffinity) притягивает под к конкретным узлам
 affinity:
   nodeAffinity:
@@ -16,16 +55,16 @@ affinity:
               operator: In
               values: infra
 
-storage:
-  type: s3
-  bucketNames:
-    chunks: loggingbucket
-    ruler: loggingbucket
-    admin: loggingbucket
-  s3:
-    endpoint: "https://storage.yandexcloud.net" # Yandex Object Storage endpoint
-    region: "us-east-1" # Yandex Object Storage uses us-east-1 as default region
-    accessKeyId: YCAJExIC0-XS-kLvjlE_tbmnZ # It's better to use secrets for this
-    secretAccessKey: YCP2TD-RGeF8loL4xGQAnjbxRjXPIy_Vt10iYV8U # It's better to use secrets for this
-    s3ForcePathStyle: true # Use path-style access (required for S3 compatible storage)
-    insecure: true
+tolerations:
+  - key: "node-role"      # Ключ тайнта на узле
+    operator: "Equal"      # Может быть "Exists" или "Equal"
+    value: "infra"  # Значение тайнта
+    effect: "NoSchedule"   # Эффект (NoSchedule, PreferNoSchedule или NoExecute)
+
+limits_config:
+  retention_period: 744h # Хранить логи 31 день
+compactor:
+  working_directory: /data/retention
+  compaction_interval: 10m
+  retention_enabled: true
+  retention_delete_delay: 2h
