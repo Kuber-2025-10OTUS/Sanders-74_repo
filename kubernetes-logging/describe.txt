@@ -1,0 +1,153 @@
+Создал кластер  
+установил yandex CLI
+нашел свой Yandex OATH token
+создал кластер
+выполнил команду yc managed-kubernetes cluster get-credentials k8s-otuslogging --external
+ yc managed-kubernetes cluster get-credentials и настроил kubectl для работы с этим кластером
+
+k config use-context yc-k8s-otuslogging
+
+$ k get node -o wide --show-labels
+NAME                        STATUS   ROLES    AGE   VERSION   INTERNAL-IP   EXTERNAL-IP      OS-IMAGE             KERNEL-VERSION       CONTAINER-RUNTIME     LABELS
+cl18v7tjaupt72pegp0n-ixan   Ready    <none>   19m   v1.32.1   10.129.0.34   158.160.80.202   Ubuntu 22.04.5 LTS   5.15.0-161-generic   containerd://1.7.27   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/instance-type=standard-v3,beta.kubernetes.io/os=linux,failure-domain.beta.kubernetes.io/zone=ru-central1-b,kubernetes.io/arch=amd64,kubernetes.io/hostname=cl18v7tjaupt72pegp0n-ixan,kubernetes.io/os=linux,node.kubernetes.io/instance-type=standard-v3,node.kubernetes.io/kube-proxy-ds-ready=true,node.kubernetes.io/masq-agent-ds-ready=true,node.kubernetes.io/node-problem-detector-ds-ready=true,topology.kubernetes.io/zone=ru-central1-b,yandex.cloud/node-group-id=cateb0guuir5oaa7ovcg,yandex.cloud/pci-topology=k8s,yandex.cloud/preemptible=false
+cl1ic331t28095jodvt9-odif   Ready    <none>   19m   v1.32.1   10.129.0.7    158.160.93.207   Ubuntu 22.04.5 LTS   5.15.0-161-generic   containerd://1.7.27   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/instance-type=standard-v3,beta.kubernetes.io/os=linux,failure-domain.beta.kubernetes.io/zone=ru-central1-b,kubernetes.io/arch=amd64,kubernetes.io/hostname=cl1ic331t28095jodvt9-odif,kubernetes.io/os=linux,node.kubernetes.io/instance-type=standard-v3,node.kubernetes.io/kube-proxy-ds-ready=true,node.kubernetes.io/masq-agent-ds-ready=true,node.kubernetes.io/node-problem-detector-ds-ready=true,topology.kubernetes.io/zone=ru-central1-b,yandex.cloud/node-group-id=cat0de3i8m1afrf24msa,yandex.cloud/pci-topology=k8s,yandex.cloud/preemptible=false
+
+k get nodes -o custom-columns=NAME:.metadata.name,TAINTS:.spec.taints
+NAME                        TAINTS
+cl18v7tjaupt72pegp0n-ixan   [map[effect:NoSchedule key:node-role value:infra]]
+cl1ic331t28095jodvt9-odif   <none>
+
+присвоил метки нодам 
+
+$ k label node cl18v7tjaupt72pegp0n-ixan noderole=infra
+node/cl18v7tjaupt72pegp0n-ixan labeled
+$ k label node cl1ic331t28095jodvt9-odif noderole=work
+node/cl1ic331t28095jodvt9-odif labeled
+
+k get node -o wide --show-labels
+NAME                        STATUS   ROLES    AGE   VERSION   INTERNAL-IP   EXTERNAL-IP      OS-IMAGE             KERNEL-VERSION       CONTAINER-RUNTIME     LABELS
+cl18v7tjaupt72pegp0n-ixan   Ready    <none>   25m   v1.32.1   10.129.0.34   158.160.80.202   Ubuntu 22.04.5 LTS   5.15.0-161-generic   containerd://1.7.27   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/instance-type=standard-v3,beta.kubernetes.io/os=linux,failure-domain.beta.kubernetes.io/zone=ru-central1-b,kubernetes.io/arch=amd64,kubernetes.io/hostname=cl18v7tjaupt72pegp0n-ixan,kubernetes.io/os=linux,node.kubernetes.io/instance-type=standard-v3,node.kubernetes.io/kube-proxy-ds-ready=true,node.kubernetes.io/masq-agent-ds-ready=true,node.kubernetes.io/node-problem-detector-ds-ready=true,noderole=infra,topology.kubernetes.io/zone=ru-central1-b,yandex.cloud/node-group-id=cateb0guuir5oaa7ovcg,yandex.cloud/pci-topology=k8s,yandex.cloud/preemptible=false
+cl1ic331t28095jodvt9-odif   Ready    <none>   25m   v1.32.1   10.129.0.7    158.160.93.207   Ubuntu 22.04.5 LTS   5.15.0-161-generic   containerd://1.7.27   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/instance-type=standard-v3,beta.kubernetes.io/os=linux,failure-domain.beta.kubernetes.io/zone=ru-central1-b,kubernetes.io/arch=amd64,kubernetes.io/hostname=cl1ic331t28095jodvt9-odif,kubernetes.io/os=linux,node.kubernetes.io/instance-type=standard-v3,node.kubernetes.io/kube-proxy-ds-ready=true,node.kubernetes.io/masq-agent-ds-ready=true,node.kubernetes.io/node-problem-detector-ds-ready=true,noderole=work,topology.kubernetes.io/zone=ru-central1-b,yandex.cloud/node-group-id=cat0de3i8m1afrf24msa,yandex.cloud/pci-topology=k8s,yandex.cloud/preemptible=false
+
+создал сервисный акк s3account.  Создал для него пару статических ключей.
+привязал акк к созданному бакету loggingbucket с ролью editor
+
+командой yc iam access-key create --service-account-name=s3account  --format=json > sa-key.json  создал json ключ.  
+
+cd ~/repo
+helm pull oci://cr.yandex/yc-marketplace/yandex-cloud/grafana/loki/chart/loki  --version 1.2.0-7 --untar 
+скачал и развернул в каталог loki
+установил loki в кластере  
+
+helm install   --namespace loki-ns  --create-namespace  --set global.bucketname=loggingbucket  --set-file global.serviceaccountawskeyvalue=./sa-key.json loki ~/repos/loki -f ./my-custom-loki-values.yaml
+
+NAME: loki
+LAST DEPLOYED: Wed Jan 21 08:15:25 2026
+NAMESPACE: loki-ns
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+
+добавил настройку на s3 бакет в values.yaml
+апгрейднул 
+
+helm upgrade --namespace loki-ns loki ~/repos/loki -f ~/repos/Sanders-74_repo/kubernetes-logging/my-custom-loki-values.yaml
+
+Release "loki" has been upgraded. Happy Helming!
+NAME: loki
+LAST DEPLOYED: Wed Jan 21 09:26:12 2026
+NAMESPACE: loki-ns
+STATUS: deployed
+REVISION: 2
+TEST SUITE: None
+
+
+$ k get po -n loki-ns -o wide
+NAME                                                    READY   STATUS    RESTARTS   AGE     IP              NODE                        NOMINATED NODE   READINESS GATES
+loki-loki-distributed-distributor-846b58d5f5-t9rq8      1/1     Running   0          2m27s   10.112.128.11   cl1ic331t28095jodvt9-odif   <none>           <none>
+loki-loki-distributed-gateway-74bb5d4956-wpfms          1/1     Running   0          2m27s   10.112.128.9    cl1ic331t28095jodvt9-odif   <none>           <none>
+loki-loki-distributed-ingester-0                        1/1     Running   0          2m26s   10.112.128.13   cl1ic331t28095jodvt9-odif   <none>           <none>
+loki-loki-distributed-querier-0                         1/1     Running   0          2m26s   10.112.128.12   cl1ic331t28095jodvt9-odif   <none>           <none>
+loki-loki-distributed-query-frontend-5cb7c5698c-jqqnz   1/1     Running   0          2m27s   10.112.128.10   cl1ic331t28095jodvt9-odif   <none>           <none>
+loki-promtail-jb86m                                     1/1     Running   0          2m27s   10.112.128.8    cl1ic331t28095jodvt9-odif   <none>           <none>
+
+ставим grafana
+
+helm repo add grafana https://grafana.github.io/helm-charts
+
+helm repo update
+
+helm install --namespace grafana-ns --create-namespace my-grafana grafana/grafana 
+
+получаем пароль от графаны  
+k get secret --namespace grafana-ns my-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+
+admin / wSEPtomOV6RAEXDXvfJWwM7HUnPp6c21xI75qcnU
+
+Запуск Графаны:
+export POD_NAME=$(kubectl get pods --namespace grafana-ns -l "app.kubernetes.io/name=grafana,app.kubernetes.io/instance=my-grafana" -o jsonpath="{.items[0].metadata.name}")
+k --namespace grafana-ns port-forward $POD_NAME 3000
+
+Устанавливаем promtail
+
+пишем promtail-values.yaml
+
+helm upgrade --values promtail-values.yaml --install promtail grafana/promtail
+
+проверяем
+k --namespace default port-forward daemonset/promtail 3101
+и в новом терминале curl http://127.0.0.1:3101/metrics
+
+метрики появились
+$ curl http://127.0.0.1:3101/metrics
+# HELP deprecated_flags_inuse_total The number of deprecated flags currently set.
+# TYPE deprecated_flags_inuse_total counter
+deprecated_flags_inuse_total 0
+# HELP go_gc_duration_seconds A summary of the wall-time pause (stop-the-world) duration in garbage collection cycles.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{quantile="0"} 3.9266e-05
+go_gc_duration_seconds{quantile="0.25"} 4.4358e-05
+go_gc_duration_seconds{quantile="0.5"} 5.8316e-05
+go_gc_duration_seconds{quantile="0.75"} 8.8715e-05
+go_gc_duration_seconds{quantile="1"} 0.000210164
+go_gc_duration_seconds_sum 0.000440819
+go_gc_duration_seconds_count 5
+# HELP go_gc_gogc_percent Heap size target percentage configured by the user, otherwise 100. This value is set by the GOGC environment variable, and the runtime/debug.SetGCPercent function. Sourced from /gc/gogc:percent.
+
+Проверяем установились ли демоны promtail на все ноды:
+
+$ k get pods -A -o wide
+NAMESPACE     NAME                                                    READY   STATUS    RESTARTS        AGE     IP              NODE                        NOMINATED NODE   READINESS GATES
+default       promtail-psf8q                                          1/1     Running   0               5m2s    10.112.129.4    cl18v7tjaupt72pegp0n-ixan   <none>           <none>
+default       promtail-qswfs                                          1/1     Running   0               5m2s    10.112.128.31   cl1ic331t28095jodvt9-odif   <none>           <none>
+grafana-ns    my-grafana-74889f776-w4nfs                              1/1     Running   0               24m     10.112.128.30   cl1ic331t28095jodvt9-odif   <none>           <none>
+kube-system   coredns-768847b69f-jr8rj                                1/1     Running   1 (5d11h ago)   5d13h   10.112.128.27   cl1ic331t28095jodvt9-odif   <none>           <none>
+kube-system   coredns-768847b69f-ts4b9                                1/1     Running   1 (5d11h ago)   5d23h   10.112.128.22   cl1ic331t28095jodvt9-odif   <none>           <none>
+kube-system   ip-masq-agent-bqdj7                                     1/1     Running   1 (5d11h ago)   5d13h   10.129.0.34     cl18v7tjaupt72pegp0n-ixan   <none>           <none>
+kube-system   ip-masq-agent-n2g8m                                     1/1     Running   1 (5d11h ago)   5d13h   10.129.0.7      cl1ic331t28095jodvt9-odif   <none>           <none>
+kube-system   kube-dns-autoscaler-66b55897-z8c8t                      1/1     Running   3 (33m ago)     5d23h   10.112.128.21   cl1ic331t28095jodvt9-odif   <none>           <none>
+kube-system   kube-proxy-bwrfv                                        1/1     Running   1 (5d11h ago)   5d13h   10.129.0.7      cl1ic331t28095jodvt9-odif   <none>           <none>
+kube-system   kube-proxy-ml8zf                                        1/1     Running   1 (5d11h ago)   5d13h   10.129.0.34     cl18v7tjaupt72pegp0n-ixan   <none>           <none>
+kube-system   metrics-server-8689cb9795-zhr9h                         1/1     Running   2 (5d11h ago)   5d23h   10.112.128.18   cl1ic331t28095jodvt9-odif   <none>           <none>
+kube-system   metrics-server-8689cb9795-zmbck                         1/1     Running   2 (5d11h ago)   5d23h   10.112.128.19   cl1ic331t28095jodvt9-odif   <none>           <none>
+kube-system   npd-v0.8.0-7lqlw                                        1/1     Running   1 (5d11h ago)   5d13h   10.112.128.29   cl1ic331t28095jodvt9-odif   <none>           <none>
+kube-system   npd-v0.8.0-lwkr2                                        1/1     Running   1 (5d11h ago)   5d13h   10.112.129.3    cl18v7tjaupt72pegp0n-ixan   <none>           <none>
+kube-system   yc-disk-csi-node-v2-d2f9g                               6/6     Running   6 (5d11h ago)   5d13h   10.129.0.34     cl18v7tjaupt72pegp0n-ixan   <none>           <none>
+kube-system   yc-disk-csi-node-v2-h6zn6                               6/6     Running   6 (5d11h ago)   5d13h   10.129.0.7      cl1ic331t28095jodvt9-odif   <none>           <none>
+loki-ns       loki-loki-distributed-distributor-765747579b-265xz      1/1     Running   1 (5d11h ago)   5d11h   10.112.128.28   cl1ic331t28095jodvt9-odif   <none>           <none>
+loki-ns       loki-loki-distributed-gateway-74bb5d4956-wpfms          1/1     Running   3 (32m ago)     5d12h   10.112.128.25   cl1ic331t28095jodvt9-odif   <none>           <none>
+loki-ns       loki-loki-distributed-ingester-0                        1/1     Running   1 (5d11h ago)   5d11h   10.112.128.24   cl1ic331t28095jodvt9-odif   <none>           <none>
+loki-ns       loki-loki-distributed-querier-0                         1/1     Running   1 (5d11h ago)   5d11h   10.112.128.20   cl1ic331t28095jodvt9-odif   <none>           <none>
+loki-ns       loki-loki-distributed-query-frontend-7b64677444-s4j7w   1/1     Running   1 (5d11h ago)   5d11h   10.112.128.23   cl1ic331t28095jodvt9-odif   <none>           <none>
+loki-ns       loki-promtail-jb86m                                     1/1     Running   1 (5d11h ago)   5d12h   10.112.128.26   cl1ic331t28095jodvt9-odif   <none>           <none>
+
+добавляем datasource в Grafana  
+helm upgrade --values promstack.yaml --namespace grafana-ns my-grafana grafana/grafana 
+
+в строке браузера набираю http://localhost:3000/login
+ввожу креды admin и wSEPtomOV6RAEXDXvfJWwM7HUnPp6c21xI75qcnU 
+
+в Connections в DataSources  не нахожу никакого DS, добавляю новый, тип loki, адрес http://loki-loki-distributed-gateway.loki-ns.svc.cluster.local
+подключаюсь и вижу логи.   Скрин приложил.
+
+

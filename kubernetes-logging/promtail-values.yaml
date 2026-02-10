@@ -1,0 +1,20 @@
+config:
+  clients:
+    - url: http://loki-gateway.loki-ns.svc.cluster.local
+      tenant_id: 1
+    # Если вы используете простую установку без gateway, используйте:
+    # - url: http://loki.loki-ns.svc.cluster.local:3100/loki/api/v1/push
+
+# 2. Настройка Tolerations для установки на ноды с Taints
+tolerations:
+  - key: "node-role"
+    operator: "Equal"
+    value: "infra"
+    effect: "NoSchedule"
+  # Рекомендуется оставить стандартные для мастер-нод, если они нужны
+  - key: "node-role.kubernetes.io/master"
+    operator: "Exists"
+    effect: "NoSchedule"
+  - key: "node-role.kubernetes.io/control-plane"
+    operator: "Exists"
+    effect: "NoSchedule"
