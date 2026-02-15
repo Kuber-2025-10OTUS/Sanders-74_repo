@@ -1,0 +1,17 @@
+
+
+создаю кубернетес кластер в Яндекс облако из 3 нод.
+Создаю конфигурацию для kubectl
+переключаюсь на нее
+
+устанавливаю consul - клонирую репозиторий
+cd repos/
+git clone https://github.com/hashicorp/consul-k8s
+cd ~/repos/cd consul-k8s
+helm install consul ./charts/consul \
+  --create-namespace \
+  --namespace consul \
+  -f ~/repos/SANDERS-74_REPO/kubernetes-vault/consul-values.yaml
+  
+
+
