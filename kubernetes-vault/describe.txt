@@ -13,5 +13,40 @@ helm install consul ./charts/consul \
   --namespace consul \
   -f ~/repos/SANDERS-74_REPO/kubernetes-vault/consul-values.yaml
   
+устанавливаю vault - клонирую репозиторий
+cd ~/repos/
+git clone https://github.com/hashicorp/vault-helm.git
+
+helm install vault ./vault-helm \
+  --create-namespace \
+  --namespace vault \
+  -f ~/repos/SANDERS-74_REPO/kubernetes-vault/vault-values.yaml
 
 
+провожу разблокировку vault  
+подключаюсь к первому поду vault и запускаю процедура генерации ключей
+kubectl exec -it vault-0 -n vault -- vault operator init
+
+получаю ключи
+
+разблокирую 
+# Первый ключ
+kubectl exec -it vault-0 -n vault -- vault operator unseal <KEY_1>
+
+# Второй ключ
+kubectl exec -it vault-0 -n vault -- vault operator unseal <KEY_2>
+
+# Третий ключ
+kubectl exec -it vault-0 -n vault -- vault operator unseal <KEY_3>
+
+то же самое с другими подами vault
+kubectl exec -it vault-1 -n vault -- vault operator unseal <KEY_1>
+kubectl exec -it vault-1 -n vault -- vault operator unseal <KEY_2>
+kubectl exec -it vault-1 -n vault -- vault operator unseal <KEY_3>
+
+kubectl exec -it vault-2 -n vault -- vault operator unseal <KEY_1>
+kubectl exec -it vault-2 -n vault -- vault operator unseal <KEY_2>
+kubectl exec -it vault-2 -n vault -- vault operator unseal <KEY_3>
+
+проверяю статус
+kubectl get pods -n vault
