@@ -1,12 +1,21 @@
 # Глобальные настройки (опционально)
 global:
   name: consul
+  image: "hashicorp/consul:1.15.2"
+  imageK8S: "hashicorp/consul-k8s-control-plane:1.1.1"
 
-# Секция серверов
 server:
   replicas: 3
   bootstrapExpect: 3
+  # Обязательно для Yandex Cloud (иначе Pending)
+  storage: "10Gi"
+  storageClass: "yc-network-hdd" 
 
-# Секция клиентов
 client:
   enabled: true
+
+# Отключаем компоненты, которые могут требовать доп. образов и зависать
+connectInject:
+  enabled: false
+controller:
+  enabled: false

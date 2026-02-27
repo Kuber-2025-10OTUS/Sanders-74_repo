@@ -1,0 +1,257 @@
+
+
+создаю кубернетес кластер в Яндекс облако из 3 нод.
+выполняю команду 
+yc managed-kubernetes cluster list
++----------------------+-----------+---------------------+-----------+--------------+-----------------------+---------------------+
+|          ID          |   NAME    |     CREATED AT      |  HEALTH   |    STATUS    |   EXTERNAL ENDPOINT   |  INTERNAL ENDPOINT  |
++----------------------+-----------+---------------------+-----------+--------------+-----------------------+---------------------+
+| cata4q9pv72cv0jql90s | k8s-vault | 2026-02-27 06:13:47 | UNHEALTHY | PROVISIONING | https://158.160.67.61 | https://10.129.0.12 |
++----------------------+-----------+---------------------+-----------+--------------+-----------------------+---------------------+
+
+узнаю ID кластера
+
+
+yc managed-kubernetes cluster get-credentials --id cata4q9pv72cv0jql90s --external
+
+Context 'yc-k8s-vault' was added as default to kubeconfig '/home/alex/.kube/config'.
+Check connection to cluster using 'kubectl cluster-info --kubeconfig /home/alex/.kube/config'.
+
+Note, that authentication depends on 'yc' and its config profile 'default'.
+To access clusters using the Kubernetes API, please use Kubernetes Service Account.
+
+kubectl config get-contexts
+
+ смотрю список кластеров.  
+ переключаюсь на только что созданный
+k config use-context yc-k8s-vault
+
+проверяю данные о кластере
+$ kubectl cluster-info
+Kubernetes control plane is running at https://158.160.67.61
+CoreDNS is running at https://158.160.67.61/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+
+$ kubectl get nodes 
+NAME                        STATUS   ROLES    AGE     VERSION
+cl14i5ef318mg981e0k7-onof   Ready    <none>   2m38s   v1.32.1
+cl14i5ef318mg981e0k7-otul   Ready    <none>   2m38s   v1.32.1
+cl14i5ef318mg981e0k7-ypuc   Ready    <none>   2m33s   v1.32.1
+
+
+устанавливаю consul - клонирую репозиторий
+cd ~/repos/
+git clone https://github.com/hashicorp/consul-k8s
+
+
+cd ~/repos/consul-k8s/charts/consul
+helm dependency build
+
+$ helm install consul . -n consul --create-namespace -f ~/repos/Sanders-74_repo/kubernetes-vault/consul-values.yaml
+NAME: consul
+LAST DEPLOYED: Fri Feb 27 11:48:10 2026
+NAMESPACE: consul
+STATUS: deployed
+REVISION: 1
+NOTES:
+Thank you for installing HashiCorp Consul!
+
+Your release is named consul.
+
+To learn more about the release, run:
+
+  $ helm status consul --namespace consul
+  $ helm get all consul --namespace consul
+
+Consul on Kubernetes Documentation:
+https://www.consul.io/docs/platform/k8s
+
+Consul on Kubernetes CLI Reference:
+https://www.consul.io/docs/k8s/k8s-cli
+
+$ kubectl get pvc -n consul
+NAME                          STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS     VOLUMEATTRIBUTESCLASS   AGE
+data-consul-consul-server-0   Bound    pvc-7b23df8b-2e09-4257-bd9a-0b1171c40870   10Gi       RWO            yc-network-hdd   <unset>                 2m14s
+data-consul-consul-server-1   Bound    pvc-4eb505dd-2a3a-4f4b-8b80-59783f144ac5   10Gi       RWO            yc-network-hdd   <unset>                 2m14s
+data-consul-consul-server-2   Bound    pvc-6ea29c6f-2323-45bb-8e57-373f4ebf9f8e   10Gi       RWO            yc-network-hdd   <unset>                 2m14s
+
+
+  
+устанавливаю vault - клонирую репозиторий
+cd ~/repos/
+git clone https://github.com/hashicorp/vault-helm.git
+
+helm install vault ./vault-helm \
+  --create-namespace \
+  --namespace vault \
+  -f ~/repos/Sanders-74_repo/kubernetes-vault/vault-values.yaml
+
+NAME: vault
+LAST DEPLOYED: Fri Feb 27 11:55:10 2026
+NAMESPACE: vault
+STATUS: deployed
+REVISION: 1
+NOTES:
+Thank you for installing HashiCorp Vault!
+
+Now that you have deployed Vault, you should look over the docs on using
+Vault with Kubernetes available here:
+
+https://developer.hashicorp.com/vault/docs
+
+
+Your release is named vault. To learn more about the release, try:
+
+  $ helm status vault
+  $ helm get manifest vault
+
+
+провожу разблокировку vault  
+подключаюсь к первому поду vault и запускаю процедура генерации ключей
+kubectl exec -it vault-0 -n vault -- vault operator init
+
+получаю ключи
+
+разблокирую 
+# Первый ключ
+kubectl exec -it vault-0 -n vault -- vault operator unseal <KEY_1>
+
+# Второй ключ
+kubectl exec -it vault-0 -n vault -- vault operator unseal <KEY_2>
+
+# Третий ключ
+kubectl exec -it vault-0 -n vault -- vault operator unseal <KEY_3>
+
+то же самое с другими подами vault
+kubectl exec -it vault-1 -n vault -- vault operator unseal <KEY_1>
+kubectl exec -it vault-1 -n vault -- vault operator unseal <KEY_2>
+kubectl exec -it vault-1 -n vault -- vault operator unseal <KEY_3>
+
+kubectl exec -it vault-2 -n vault -- vault operator unseal <KEY_1>
+kubectl exec -it vault-2 -n vault -- vault operator unseal <KEY_2>
+kubectl exec -it vault-2 -n vault -- vault operator unseal <KEY_3>
+
+проверяю статус
+kubectl get pods -n vault
+
+инициализирую 
+vault operator init --key-shares=1 --key-thesholds=1
+
+копирую себе root токен и unseal ключ 
+
+распечатываю vault хранилище
+vault operator unseal
+
+ввожу unseal ключ.  Обычно ключей несколько
+
+
+включаю авторизацию kubernetes
+vault auth enable kubernetes
+
+запрашиваю информацию по кластеру
+kubectl cluster-info
+
+конфигурирую enpoint авторизации  
+vault write auth/kubernetes/config \
+    token_reviewer_jwt="$SA_JWT_TOKEN" \
+    kubernetes_host=https://192.168.99.100:<your TCP port or blank for 443> \
+    kubernetes_ca_cert=@ca.crt
+
+
+
+включаю хранилище kv
+vault secrets enable -path=otus kv-v2
+
+создаю секрет
+vault kv put otus/cred username='otus' password='asajkjkahs’
+
+получаю список секретов
+
+vault kv list -mount=otus otus/cred/
+
+получаю ключи и их значения
+vault kv get otus/cred 
+
+создаю сервисный акк 
+k apply -f SA.yaml
+
+привязываю его к роли 
+k apply -f Kub-SA.yaml
+
+# имя секрета, связанного с SA
+
+export VAULT_SA_NAME=$(kubectl get sa vault-auth -o jsonpath='{.secrets[0].name}')
+получаю JWT токен
+export SA_JWT_TOKEN=$(kubectl get secret $VAULT_SA_NAME -o jsonpath='{.data.token}' | base64 --decode)
+получаю сертификат
+export SA_CA_CRT=$(kubectl get secret $VAULT_SA_NAME -o jsonpath='{.data.ca\.crt}' | base64 --decode)
+получаю адрес хоста
+export K8S_HOST=$(kubectl config view --raw --minify --flatten -o jsonpath='{.clusters[0].cluster.server}')
+
+в контейнере Vault включаю авторизацию
+vault auth enable kubernetes
+
+настраиваю 
+vault write auth/kubernetes/config \
+    token_reviewer_jwt="$SA_JWT_TOKEN" \
+    kubernetes_host="$K8S_HOST" \
+    kubernetes_ca_cert="$SA_CA_CRT" \
+    issuer="https://kubernetes.default.svc.cluster.local"
+
+
+создаю политику
+
+path "otus/data/cred/*" {
+  capabilities = ["read"]
+}
+
+# Доступ к метаданным (чтобы работал список/list)
+path "otus/metadata/cred/*" {
+  capabilities = ["list"]
+}
+
+применяю политику
+vault policy write otus-policy - <<EOF
+path "otus/data/cred/*" {
+  capabilities = ["read"]
+}
+
+# Доступ к метаданным (чтобы работал список/list)
+path "otus/metadata/cred/*" {
+  capabilities = ["list"]
+}
+EOF
+
+создаю роль vault объединяющую сервисный акк vault-auth
+ с namespace vault и политикой otus-policy
+
+vault write auth/kubernetes/role/otus \
+    bound_service_account_names=vault-auth \
+    bound_service_account_namespaces=vault \
+    policies=otus-policy \
+    ttl=1h
+
+добавляю репозиторий 
+
+helm repo add external-secrets https://charts.external-secrets.io
+helm repo update
+
+устанавливаю external-secrets-operator в namespace vault
+
+helm install external-secrets external-secrets/external-secrets \
+  --namespace vault \
+  --set installCRDs=true
+
+применяю манифест secret store
+k apply -f ./SecretStore.yaml -ns vault
+
+применяю манифест externalsecretoperator
+k apply -f ./externalsecretoperator.yaml
+
+проверяю статус синхронизации
+
+kubectl get externalsecret otus-external-secret -n vault
+
+смотрю созданный секрет
+kubectl get secret otus-k8s-secret -n vault -o yaml
