@@ -1,21 +1,27 @@
-# Глобальные настройки (опционально)
 global:
   name: consul
-  image: "hashicorp/consul:1.15.2"
-  imageK8S: "hashicorp/consul-k8s-control-plane:1.1.1"
+  image: "mirror.gcr.io/hashicorp/consul:1.15.2"
+  imageK8S: "mirror.gcr.io/hashicorp/consul-k8s-control-plane:1.5.4"
 
 server:
   replicas: 3
   bootstrapExpect: 3
-  # Обязательно для Yandex Cloud (иначе Pending)
   storage: "10Gi"
-  storageClass: "yc-network-hdd" 
+  storageClass: "yc-network-hdd"
+
+# Эти секции часто дергают дополнительные init-контейнеры, лучше выключить явно
+syncCatalog:
+  enabled: false
+
+dns:
+  enabled: false
+
+connectInject:
+  enabled: false
+
+controller:
+  enabled: false
 
 client:
   enabled: true
-
-# Отключаем компоненты, которые могут требовать доп. образов и зависать
-connectInject:
-  enabled: false
-controller:
-  enabled: false
+  image: "mirror.gcr.io/hashicorp/consul:1.15.2"

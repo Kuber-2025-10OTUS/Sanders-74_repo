@@ -44,6 +44,9 @@ cl14i5ef318mg981e0k7-ypuc   Ready    <none>   2m33s   v1.32.1
 cd ~/repos/
 git clone https://github.com/hashicorp/consul-k8s
 
+деинсталляция consul
+kubectl delete pvc -l app=consul -n consul
+helm uninstall consul -n consul
 
 cd ~/repos/consul-k8s/charts/consul
 helm dependency build
@@ -103,12 +106,14 @@ https://developer.hashicorp.com/vault/docs
 
 Your release is named vault. To learn more about the release, try:
 
-  $ helm status vault
+  $ helm status vault -n vault
   $ helm get manifest vault
 
 
 провожу разблокировку vault  
 подключаюсь к первому поду vault и запускаю процедура генерации ключей
+k exec -it vault-0 -n vault  -- sh
+
 kubectl exec -it vault-0 -n vault -- vault operator init
 
 получаю ключи
